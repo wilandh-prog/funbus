@@ -79,8 +79,14 @@
     flex-shrink: 0;
 }
 
+.route-action-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
 #addRouteBtn, #deleteRouteBtn, #deleteStopTopBtn {
-    padding: 8px 16px;
+    padding: 8px 12px;
     background: #2a2a2a;
     color: #fff;
     border: 1px solid #444;
