@@ -340,41 +340,8 @@
         justify-content: center;
     }
 
-    #left-sidebar {
-        position: fixed;
-        left: -220px;
-        top: 0;
-        bottom: 0;
-        z-index: 200;
-        transition: left 0.3s ease;
-        width: 220px;
-    }
-
-    #left-sidebar.open {
-        left: 0;
-    }
-
-    /* Sidebar toggle button for mobile */
-    .sidebar-toggle {
-        display: block;
-        position: fixed;
-        left: 10px;
-        bottom: 20px;
-        z-index: 201;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background: #3a3a3a;
-        border: 2px solid #4ade80;
-        color: #4ade80;
-        font-size: 24px;
-        cursor: pointer;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    }
-
     #game-area {
         padding: 10px;
-        margin-left: 0;
     }
 
     #zoom-controls {
@@ -386,13 +353,6 @@
         display: flex;
         bottom: 80px;
         left: 10px;
-    }
-}
-
-/* Desktop - hide sidebar toggle */
-@media (min-width: 769px) {
-    .sidebar-toggle {
-        display: none;
     }
 }
 

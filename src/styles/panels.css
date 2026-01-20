@@ -890,3 +890,82 @@
         font-size: 14px;
     }
 }
+
+/* ============================================
+   MOBILE LAYOUT
+   ============================================ */
+
+/* Sidebar toggle button - hidden on desktop */
+.sidebar-toggle {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    /* Hide sidebar off-screen by default */
+    #left-sidebar {
+        position: fixed;
+        left: -240px;
+        top: 60px;
+        bottom: 0;
+        width: 220px;
+        z-index: 1500;
+        transition: left 0.3s ease;
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+    }
+
+    #left-sidebar.open {
+        left: 0;
+    }
+
+    /* Show sidebar toggle button on mobile */
+    .sidebar-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        left: 10px;
+        bottom: 20px;
+        z-index: 1501;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #2a2a2a;
+        border: 2px solid #4ade80;
+        color: #4ade80;
+        font-size: 24px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .sidebar-toggle:active {
+        transform: scale(0.95);
+    }
+
+    /* Remove left margin from game area */
+    #app-container {
+        margin-left: 0;
+    }
+
+    /* Top bar adjustments for mobile */
+    #top-bar {
+        padding: 0 10px;
+    }
+
+    .top-bar-left {
+        gap: 8px;
+    }
+
+    .return-to-menu-btn {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+
+    .pause-btn {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+
+    .top-bar-money {
+        display: none;
+    }
+}
