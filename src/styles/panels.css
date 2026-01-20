@@ -445,6 +445,26 @@
     border-color: #666;
 }
 
+.tutorial-btn {
+    width: 100%;
+    padding: 10px;
+    background: linear-gradient(135deg, #1a3a5a 0%, #2a2a2a 100%);
+    color: #4a9eff;
+    border: 1px solid #4a9eff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+    transition: all 0.2s;
+    margin-top: 8px;
+}
+
+.tutorial-btn:hover {
+    background: linear-gradient(135deg, #2a4a6a 0%, #3a3a3a 100%);
+    border-color: #6ab0ff;
+    box-shadow: 0 0 12px rgba(74, 158, 255, 0.3);
+}
+
 /* App Container */
 #app-container {
     margin-top: 60px;

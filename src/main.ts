@@ -15,6 +15,7 @@ import { TouchHandler } from './utils/TouchHandler';
 import { confirmDelete, confirmClear } from './ui/ConfirmDialog';
 import { initCollapsibleSections } from './ui/CollapsibleSections';
 import { gameToasts } from './ui/Toast';
+import { startTutorial, shouldShowTutorial, resetTutorial } from './ui/Tutorial';
 
 const MAX_STOPS = 40;
 
@@ -165,6 +166,32 @@ async function startGame(cityId: string, progression: ProgressionData, startFres
   });
 
   console.log('✓ Game started!');
+
+  // Show tutorial for first-time users (after a short delay to let the game render)
+  if (shouldShowTutorial()) {
+    setTimeout(() => {
+      // Pause the game during tutorial
+      if (!gameEngine.isPaused()) {
+        gameEngine.togglePause();
+        const pauseBtn = document.getElementById('pause-btn');
+        if (pauseBtn) {
+          pauseBtn.textContent = '▶ Play';
+          pauseBtn.classList.add('paused');
+        }
+      }
+      startTutorial(() => {
+        // Resume game after tutorial
+        if (gameEngine.isPaused()) {
+          gameEngine.togglePause();
+          const pauseBtn = document.getElementById('pause-btn');
+          if (pauseBtn) {
+            pauseBtn.textContent = '⏸ Pause';
+            pauseBtn.classList.remove('paused');
+          }
+        }
+      });
+    }, 500);
+  }
 }
 
 // Track last cursor position for money spent indicator
@@ -1536,6 +1563,29 @@ function setupUIHandlers(
   if (closeHelpBtn && helpPanel) {
     closeHelpBtn.addEventListener('click', () => {
       helpPanel.style.display = 'none';
+    });
+  }
+
+  // Show Tutorial button
+  const showTutorialBtn = document.getElementById('show-tutorial-btn');
+  if (showTutorialBtn) {
+    showTutorialBtn.addEventListener('click', () => {
+      // Reset tutorial so it can be shown again
+      resetTutorial();
+      // Pause the game during tutorial
+      if (!gameEngine.isPaused()) {
+        gameEngine.togglePause();
+        pauseBtn.textContent = '▶ Play';
+        pauseBtn.classList.add('paused');
+      }
+      startTutorial(() => {
+        // Resume game after tutorial
+        if (gameEngine.isPaused()) {
+          gameEngine.togglePause();
+          pauseBtn.textContent = '⏸ Pause';
+          pauseBtn.classList.remove('paused');
+        }
+      });
     });
   }
 
