@@ -1,0 +1,314 @@
+/**
+ * City Selection Menu Styles
+ */
+
+/* Return to Menu Button */
+.return-to-menu-btn {
+  background: #555;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+
+.return-to-menu-btn:hover {
+  background: #666;
+}
+
+.return-to-menu-btn:active {
+  transform: scale(0.98);
+}
+
+/* Pause Button */
+.pause-btn {
+  background: #2a5;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.pause-btn:hover {
+  background: #3b6;
+}
+
+.pause-btn:active {
+  transform: scale(0.98);
+}
+
+.pause-btn.paused {
+  background: #f44;
+}
+
+.pause-btn.paused:hover {
+  background: #f66;
+}
+
+/* City Selection Overlay */
+
+.city-selection-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.city-selection-panel {
+  background: #2a2a2a;
+  border: 2px solid #444;
+  border-radius: 10px;
+  padding: 40px;
+  max-width: 1200px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.city-selection-panel h1 {
+  font-size: 36px;
+  margin: 0 0 30px 0;
+  text-align: center;
+  color: #fff;
+  font-weight: bold;
+}
+
+.city-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.city-card {
+  background: #3a3a3a;
+  border: 2px solid #555;
+  border-radius: 8px;
+  padding: 20px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.city-card.unlocked {
+  cursor: pointer;
+}
+
+.city-card.unlocked:hover {
+  border-color: #4ade80;
+  box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+  transform: translateY(-5px);
+}
+
+.city-card.locked {
+  opacity: 0.5;
+  background: #2a2a2a;
+  cursor: not-allowed;
+}
+
+.city-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.city-card h3 {
+  margin: 0;
+  font-size: 24px;
+  color: #fff;
+  font-weight: bold;
+}
+
+.city-difficulty {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.city-difficulty.easy {
+  background: #4ade80;
+  color: #000;
+}
+
+.city-difficulty.medium {
+  background: #fbbf24;
+  color: #000;
+}
+
+.city-difficulty.hard {
+  background: #f87171;
+  color: #fff;
+}
+
+.city-description {
+  color: #aaa;
+  margin: 10px 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.unlock-requirement {
+  color: #fbbf24;
+  font-weight: bold;
+  margin-top: 15px;
+  padding: 10px;
+  background: rgba(251, 191, 36, 0.1);
+  border-radius: 4px;
+  text-align: center;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.city-stats {
+  display: flex;
+  gap: 20px;
+  margin: 15px 0;
+}
+
+.city-stat {
+  flex: 1;
+  text-align: center;
+}
+
+.city-stat .stat-label {
+  display: block;
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.city-stat .stat-value {
+  display: block;
+  font-size: 20px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.stat-value.score-excellent {
+  color: #4ade80;
+}
+
+.stat-value.score-good {
+  color: #fbbf24;
+}
+
+.stat-value.score-poor {
+  color: #f87171;
+}
+
+.play-btn {
+  width: 100%;
+  padding: 12px;
+  background: #4444ff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 10px;
+}
+
+.play-btn:hover {
+  background: #5555ff;
+  box-shadow: 0 0 15px rgba(68, 68, 255, 0.5);
+}
+
+.play-btn:active {
+  transform: scale(0.98);
+}
+
+/* Continue button (primary action) */
+.continue-btn {
+  background: #4ade80;
+  color: #000;
+  font-size: 18px;
+}
+
+.continue-btn:hover {
+  background: #5ef090;
+  box-shadow: 0 0 15px rgba(74, 222, 128, 0.5);
+}
+
+/* New Game button (secondary action) */
+.new-game-btn {
+  background: #666;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.new-game-btn:hover {
+  background: #777;
+  box-shadow: 0 0 15px rgba(102, 102, 102, 0.5);
+}
+
+.menu-footer {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid #444;
+}
+
+.danger-btn {
+  padding: 10px 20px;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.danger-btn:hover {
+  background: #b91c1c;
+}
+
+.danger-btn:active {
+  transform: scale(0.98);
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .city-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+
+  .city-selection-panel {
+    padding: 30px;
+  }
+
+  .city-selection-panel h1 {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  .city-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .city-selection-panel {
+    padding: 20px;
+    max-width: 95vw;
+  }
+
+  .city-selection-panel h1 {
+    font-size: 24px;
+  }
+}

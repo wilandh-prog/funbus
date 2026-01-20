@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bus Line Simulator</title>
+    <link rel="stylesheet" href="/src/styles/main.css">
+    <link rel="stylesheet" href="/src/styles/game.css">
+    <link rel="stylesheet" href="/src/styles/panels.css">
+    <link rel="stylesheet" href="/src/styles/city-selection.css">
+</head>
+<body>
+    <!-- Top Bar -->
+    <div id="top-bar">
+        <div class="top-bar-left">
+            <button id="return-to-menu-btn" class="return-to-menu-btn" style="margin-right: 15px;">← Cities</button>
+            <button id="pause-btn" class="pause-btn" title="Pause (Space)">⏸ Pause</button>
+            <div class="top-bar-money">
+                <span class="money-label">Money:</span>
+                <span class="money-value" id="topBarMoney">$5000</span>
+            </div>
+        </div>
+        <div class="top-bar-center">
+            <div id="routeControls">
+                <button id="addRouteBtn">+ Add Route</button>
+                <div id="routeTabs"></div>
+                <button id="deleteRouteBtn">Delete Route</button>
+                <div class="bus-controls">
+                    <button id="addBusBtn">+ Bus</button>
+                    <span id="topBarBusCount">Buses: 1</span>
+                    <button id="removeBusBtn">- Bus</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div id="app-container">
+        <!-- Left Sidebar -->
+        <div id="left-sidebar">
+            <div class="sidebar-section" data-section="statistics">
+                <div class="sidebar-section-header">
+                    <h3>Statistics</h3>
+                    <span class="collapse-icon">▼</span>
+                </div>
+                <div class="sidebar-section-content">
+                <div id="ui">
+                    <div class="stat overall-score">
+                        <div class="stat-label">Score</div>
+                        <div class="stat-value" id="overallScore">0</div>
+                    </div>
+
+                    <div class="stat time-display">
+                        <div class="stat-label">Time</div>
+                        <div class="stat-value" id="timeOfDay">06:00</div>
+                    </div>
+
+                    <div class="stats-subsection">
+                        <h4 class="stats-subsection-title">Active Route</h4>
+                        <div class="stat">
+                            <div class="stat-label">Stops</div>
+                            <div class="stat-value" id="stopsCount">0/8</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Buses</div>
+                            <div class="stat-value" id="busCount">1</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Efficiency</div>
+                            <div class="stat-value" id="activeRouteEfficiency">0%</div>
+                        </div>
+                    </div>
+
+                    <div class="stats-divider"></div>
+
+                    <div class="stats-subsection">
+                        <h4 class="stats-subsection-title">Total Network</h4>
+                        <div class="stat">
+                            <div class="stat-label">NPCs (W/T)</div>
+                            <div class="stat-value" id="npcCount">0/0</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Trips</div>
+                            <div class="stat-value" id="tripsCount">0</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Avg Wait</div>
+                            <div class="stat-value" id="avgWaitTime">0s</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Avg Transport</div>
+                            <div class="stat-value" id="avgTransportTime">0s</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Gave Up</div>
+                            <div class="stat-value" id="gaveUpCount">0</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Coverage</div>
+                            <div class="stat-value" id="coverage">0%</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Avg Efficiency</div>
+                            <div class="stat-value" id="routeEfficiency">0%</div>
+                        </div>
+                    </div>
+
+                    <div class="stats-divider"></div>
+
+                    <div class="stats-subsection">
+                        <h4 class="stats-subsection-title">Profit & Loss</h4>
+
+                        <div class="pl-section">
+                            <div class="pl-header">Income</div>
+                            <div class="pl-item">
+                                <span class="pl-label">Ticket Sales</span>
+                                <span class="pl-value positive" id="ticketIncome">$0</span>
+                            </div>
+                            <div class="pl-total">
+                                <span class="pl-label">Total Income</span>
+                                <span class="pl-value positive" id="totalIncome">$0</span>
+                            </div>
+                        </div>
+
+                        <div class="pl-section">
+                            <div class="pl-header">Operating Expenses</div>
+                            <div class="pl-item">
+                                <span class="pl-label">Bus Operating</span>
+                                <span class="pl-value negative" id="busRunningCost">$0</span>
+                            </div>
+                            <div class="pl-item">
+                                <span class="pl-label">Depreciation</span>
+                                <span class="pl-value negative" id="depreciation">$0</span>
+                            </div>
+                            <div class="pl-item">
+                                <span class="pl-label">Interest Expense</span>
+                                <span class="pl-value negative" id="interestExpense">$0</span>
+                            </div>
+                            <div class="pl-total">
+                                <span class="pl-label">Total Expenses</span>
+                                <span class="pl-value negative" id="totalExpenses">$0</span>
+                            </div>
+                        </div>
+
+                        <div class="pl-section">
+                            <div class="pl-net">
+                                <span class="pl-label">Net Profit</span>
+                                <span class="pl-value" id="netProfit">$0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-divider"></div>
+
+                    <div class="stats-subsection">
+                        <h4 class="stats-subsection-title">Balance Sheet</h4>
+                        <div class="stat">
+                            <div class="stat-label">Book Value</div>
+                            <div class="stat-value" id="bookValue">$0</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Equity</div>
+                            <div class="stat-value" id="equity">$0</div>
+                        </div>
+                    </div>
+
+                    <div class="stats-divider"></div>
+
+                    <div class="stats-subsection">
+                        <h4 class="stats-subsection-title">Financing</h4>
+                        <div class="stat">
+                            <div class="stat-label">Loan Balance</div>
+                            <div class="stat-value" id="loanBalance">$0</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Available (2x Equity)</div>
+                            <div class="stat-value" id="availableLoan">$0</div>
+                        </div>
+                        <div class="loan-controls">
+                            <button id="borrowBtn" class="loan-btn borrow">Borrow $500</button>
+                            <button id="repayBtn" class="loan-btn repay">Repay $500</button>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section" data-section="traffic">
+                <div class="sidebar-section-header">
+                    <h3>Traffic</h3>
+                    <span class="collapse-icon">▼</span>
+                </div>
+                <div class="sidebar-section-content">
+                <div class="traffic-controls">
+                    <div class="traffic-control-row">
+                        <span id="trafficLevel">Low Traffic</span>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section" data-section="visual-aids">
+                <div class="sidebar-section-header">
+                    <h3>Visual Aids</h3>
+                    <span class="collapse-icon">▼</span>
+                </div>
+                <div class="sidebar-section-content">
+                <div class="visual-aids-controls">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="showCoverageRadius" checked>
+                        <span>Show Coverage Radius</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="showBusSpeed" checked>
+                        <span>Show Bus Speed</span>
+                    </label>
+                </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section" data-section="stops">
+                <div class="sidebar-section-header">
+                    <h3>Stops <span id="stopCountDisplay">0/40</span></h3>
+                    <span class="collapse-icon">▼</span>
+                </div>
+                <div class="sidebar-section-content">
+                <div id="stopList"></div>
+                <button id="clearAllBtn" class="clear-all-btn">Clear All</button>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <button id="toggle-help-btn" class="help-btn">? Help</button>
+            </div>
+        </div>
+
+        <!-- Game Area -->
+        <div id="game-area">
+            <canvas id="gameCanvas" width="1800" height="1800"></canvas>
+
+            <!-- Zoom Controls -->
+            <div id="zoom-controls">
+                <button id="zoom-in-btn" class="zoom-btn" title="Zoom In">+</button>
+                <div id="zoom-level">100%</div>
+                <button id="zoom-out-btn" class="zoom-btn" title="Zoom Out">-</button>
+                <button id="zoom-reset-btn" class="zoom-btn" title="Reset Zoom">⊙</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Panel (Hidden by default) -->
+    <div id="help-panel" style="display: none;">
+        <button id="close-help-btn" class="close-help-btn">×</button>
+        <div class="help-content">
+            <h2>Instructions</h2>
+
+            <p><strong>Pause:</strong> Click the pause button (top-left) or press <strong>Space</strong> to pause/resume the game. Plan your routes strategically without time pressure!</p>
+
+            <p><strong>Multi-Route System:</strong> Create up to 8 bus routes with different colors. Click "+ Add Route" to create new routes. Switch between routes using the colored tabs to edit different lines.</p>
+
+            <p><strong>Interaction Modes:</strong></p>
+            <ul>
+                <li><strong>Menu Mode:</strong> Click on any road → Select action from menu (Select/Add/Move/Delete stop). Traditional workflow with explicit menu choices. Max 40 stops per route.</li>
+                <li><strong>Direct Mode:</strong> Click empty road → Instantly add stop. Drag stop circles → Move to new location. Right-click stop → Delete. Faster workflow for quick route editing.</li>
+            </ul>
+
+            <p><strong>Touch Controls (Mobile):</strong></p>
+            <ul>
+                <li><strong>Tap:</strong> Add stop or select existing stop</li>
+                <li><strong>Long press:</strong> Delete stop (replaces right-click)</li>
+                <li><strong>Drag:</strong> Move existing stops</li>
+                <li><strong>Pinch:</strong> Zoom in/out on the map</li>
+                <li><strong>Two-finger drag:</strong> Pan the map</li>
+            </ul>
+
+            <p><strong>Multi-Stop Locations:</strong> When multiple routes have stops at the same location, clicking or dragging will show a menu to select which route to interact with.</p>
+
+            <p>Each bus loops through its route's stops independently, picking up NPCs and dropping them near their destinations. NPCs board any bus that takes them closer to their destination. NPCs wait max 60s before giving up.</p>
+
+            <p><strong>Score System (0-100):</strong> Success Rate (30pts) + Low Wait Times (30pts) + Fast Transport (20pts) + Coverage (20pts). Focused on NPC happiness - did they reach their destination quickly without waiting too long? Green = Excellent (70+), Yellow = Good (40+), Red = Needs Work.</p>
+
+            <p><strong>Route Efficiency:</strong> Shown separately in stats panel. Measures route design quality based on stop spacing (5-8 grid cells optimal), optimal route length (6-10 stops ideal), bus-to-stop ratio (1 bus per 5 stops), and route compactness (not too sprawling).</p>
+
+            <p><strong>Dynamic Traffic:</strong> Traffic density changes throughout the day - high during morning (7-9am) and evening (5-7pm) rush hours, medium during the day, and low at night. Buses slow down significantly during peak traffic times.</p>
+
+            <p><strong>Visual Feedback:</strong></p>
+            <ul>
+                <li><strong>Coverage Radius:</strong> Green dashed circles show each stop's service area (4 grid cells). Zones within this radius count toward your coverage score.</li>
+                <li><strong>Bus Speed Indicators:</strong> Colored rings around moving buses show their current speed - Green (full speed), Yellow (medium), Orange (slow), Red (very slow from traffic).</li>
+            </ul>
+
+            <h3>Legend</h3>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color residential"></div>
+                    <span>Residential</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color commercial"></div>
+                    <span>Commercial</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color industrial"></div>
+                    <span>Industrial</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color stop"></div>
+                    <span>Bus Stop</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color bus"></div>
+                    <span>Bus</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color npc"></div>
+                    <span>NPC</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color traffic"></div>
+                    <span>Traffic</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="miniMenu">
+        <button id="selectStopBtn" class="mini-menu-btn select">◉ Select Stop</button>
+        <button id="addStopBtn" class="mini-menu-btn add">+ Add Stop</button>
+        <button id="moveStopBtn" class="mini-menu-btn move">↔ Move Stop Here</button>
+        <button id="deleteStopBtn" class="mini-menu-btn delete">- Delete Stop</button>
+    </div>
+
+    <!-- Mobile sidebar toggle -->
+    <button id="sidebarToggle" class="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
+
+    <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
