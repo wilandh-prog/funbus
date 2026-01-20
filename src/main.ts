@@ -1872,6 +1872,45 @@ function setupUIHandlers(
     setZoom(1.0);
   });
 
+  // Pan button handlers (for mobile)
+  const PAN_AMOUNT = 100; // pixels to pan per click
+  const panUpBtn = document.getElementById('pan-up-btn');
+  const panDownBtn = document.getElementById('pan-down-btn');
+  const panLeftBtn = document.getElementById('pan-left-btn');
+  const panRightBtn = document.getElementById('pan-right-btn');
+  const panCenterBtn = document.getElementById('pan-center-btn');
+
+  if (panUpBtn) {
+    panUpBtn.addEventListener('click', () => {
+      camera.y += PAN_AMOUNT;
+    });
+  }
+  if (panDownBtn) {
+    panDownBtn.addEventListener('click', () => {
+      camera.y -= PAN_AMOUNT;
+    });
+  }
+  if (panLeftBtn) {
+    panLeftBtn.addEventListener('click', () => {
+      camera.x += PAN_AMOUNT;
+    });
+  }
+  if (panRightBtn) {
+    panRightBtn.addEventListener('click', () => {
+      camera.x -= PAN_AMOUNT;
+    });
+  }
+  if (panCenterBtn) {
+    panCenterBtn.addEventListener('click', () => {
+      // Center the camera on the map
+      const mapWidth = COLS * GRID_SIZE;
+      const mapHeight = ROWS * GRID_SIZE;
+      const canvasRect = canvas.getBoundingClientRect();
+      camera.x = (canvasRect.width - mapWidth * camera.zoom) / 2;
+      camera.y = (canvasRect.height - mapHeight * camera.zoom) / 2;
+    });
+  }
+
   // Mouse wheel zoom handler
   canvas.addEventListener('wheel', (e) => {
     e.preventDefault();

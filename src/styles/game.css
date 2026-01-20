@@ -157,6 +157,65 @@
     padding: 4px 0;
 }
 
+/* Pan Controls - hidden on desktop, shown on mobile */
+#pan-controls {
+    display: none;
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: rgba(30, 30, 30, 0.9);
+    padding: 10px;
+    border-radius: 8px;
+    border: 2px solid #444;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    z-index: 100;
+}
+
+.pan-row {
+    display: flex;
+    gap: 4px;
+}
+
+.pan-btn {
+    width: 44px;
+    height: 44px;
+    background: #3a3a3a;
+    color: #fff;
+    border: 2px solid #555;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pan-btn:hover {
+    background: #4a4a4a;
+    border-color: #4a9eff;
+}
+
+.pan-btn:active {
+    background: #4a9eff;
+    transform: scale(0.9);
+}
+
+.pan-btn.center {
+    font-size: 14px;
+    color: #4a9eff;
+    border-color: #4a9eff;
+}
+
+.pan-btn.center:hover {
+    background: #4a9eff;
+    color: #fff;
+}
+
 /* ============================================
    TOUCH / MOBILE SUPPORT
    ============================================ */
@@ -321,6 +380,12 @@
     #zoom-controls {
         bottom: 80px;
         right: 10px;
+    }
+
+    #pan-controls {
+        display: flex;
+        bottom: 80px;
+        left: 10px;
     }
 }
 
