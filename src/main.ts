@@ -685,6 +685,14 @@ function setupUIHandlers(
           (newState as any).selectedStopIndex = index;
         }
         updateStopList();
+        // Update delete stop button after selection change
+        const deleteBtn = document.getElementById('deleteStopTopBtn') as HTMLButtonElement;
+        if (deleteBtn) {
+          const currentState = gameEngine.getState();
+          const hasSelected = currentState.selectedStopIndex !== null && currentState.selectedStopIndex !== -1;
+          deleteBtn.disabled = !hasSelected;
+          deleteBtn.textContent = hasSelected ? `Delete Stop ${currentState.selectedStopIndex + 1}` : 'Delete Stop';
+        }
       });
 
       stopListContainer.appendChild(stopItem);
@@ -1044,10 +1052,43 @@ function setupUIHandlers(
         updateRouteTabs();
         updateStopList();
         updateBusCount();
+        updateDeleteStopButton();
         gameToasts.routeDeleted(routeNumber);
       }
     );
   });
+
+  // Delete Stop button (top bar)
+  const deleteStopTopBtn = document.getElementById('deleteStopTopBtn') as HTMLButtonElement;
+
+  function updateDeleteStopButton() {
+    const state = gameEngine.getState();
+    const hasSelectedStop = state.selectedStopIndex !== null && state.selectedStopIndex !== -1;
+    const hasRoute = state.routes.length > 0;
+
+    if (deleteStopTopBtn) {
+      deleteStopTopBtn.disabled = !hasSelectedStop || !hasRoute;
+      if (hasSelectedStop && hasRoute) {
+        const stopNum = state.selectedStopIndex + 1;
+        deleteStopTopBtn.textContent = `Delete Stop ${stopNum}`;
+      } else {
+        deleteStopTopBtn.textContent = 'Delete Stop';
+      }
+    }
+  }
+
+  if (deleteStopTopBtn) {
+    deleteStopTopBtn.addEventListener('click', () => {
+      const state = gameEngine.getState();
+      if (state.selectedStopIndex === null || state.selectedStopIndex === -1) return;
+      if (state.routes.length === 0) return;
+
+      const stopIndex = state.selectedStopIndex;
+      removeStop(stopIndex);
+      updateDeleteStopButton();
+      gameToasts.stopDeleted();
+    });
+  }
 
   // Pause button
   const pauseBtn = document.getElementById('pause-btn')!;

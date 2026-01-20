@@ -79,7 +79,7 @@
     flex-shrink: 0;
 }
 
-#addRouteBtn, #deleteRouteBtn {
+#addRouteBtn, #deleteRouteBtn, #deleteStopTopBtn {
     padding: 8px 16px;
     background: #2a2a2a;
     color: #fff;
@@ -98,12 +98,19 @@
     border-color: #666;
 }
 
-#deleteRouteBtn {
+#deleteRouteBtn, #deleteStopTopBtn {
     background: #8b0000;
 }
 
-#deleteRouteBtn:hover {
+#deleteRouteBtn:hover, #deleteStopTopBtn:hover:not(:disabled) {
     background: #a00000;
+}
+
+#deleteStopTopBtn:disabled {
+    background: #3a3a3a;
+    color: #666;
+    cursor: not-allowed;
+    border-color: #333;
 }
 
 /* Bus Controls */

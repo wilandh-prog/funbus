@@ -175,6 +175,9 @@ export const gameToasts = {
   stopRemoved: () =>
     toastInfo('Stop removed', '📍'),
 
+  stopDeleted: () =>
+    toastInfo('Stop deleted', '🗑'),
+
   stopMoved: () =>
     toastSuccess('Stop moved', '↔'),
 
