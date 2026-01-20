@@ -1475,6 +1475,12 @@ function setupUIHandlers(
     edgePanVelocity.x = 0;
     edgePanVelocity.y = 0;
 
+    // Disable edge panning on mobile/touch devices (use pan buttons instead)
+    const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+    if (isTouchDevice) {
+      return;
+    }
+
     // Don't pan if over UI elements
     if (isScrollingUI) {
       return;
@@ -1932,11 +1938,30 @@ function setupUIHandlers(
 
   uiControls.forEach((control) => {
     if (control) {
-      control.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
-      control.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
-      control.addEventListener('touchend', (e) => e.stopPropagation(), { passive: true });
+      control.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+      }, { passive: true });
+      control.addEventListener('touchmove', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+      }, { passive: false });
+      control.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+      }, { passive: true });
     }
   });
+
+  // Extra protection for zoom controls - they seem more problematic
+  const zoomControls = document.getElementById('zoom-controls');
+  if (zoomControls) {
+    // Block all touch events from reaching the canvas
+    ['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach((eventType) => {
+      zoomControls.addEventListener(eventType, (e) => {
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+      }, { capture: true, passive: true });
+    });
+  }
 
   // ============================================
   // TOUCH SUPPORT
