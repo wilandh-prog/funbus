@@ -608,6 +608,26 @@ function setupUIHandlers(
   }
 
   /**
+   * Update delete stop button state based on selection
+   */
+  function updateDeleteStopButton() {
+    const state = gameEngine.getState();
+    const hasSelectedStop = state.selectedStopIndex !== null && state.selectedStopIndex !== -1;
+    const hasRoute = state.routes.length > 0;
+
+    const deleteStopTopBtn = document.getElementById('deleteStopTopBtn') as HTMLButtonElement;
+    if (deleteStopTopBtn) {
+      deleteStopTopBtn.disabled = !hasSelectedStop || !hasRoute;
+      if (hasSelectedStop && hasRoute) {
+        const stopNum = state.selectedStopIndex + 1;
+        deleteStopTopBtn.textContent = `Delete Stop ${stopNum}`;
+      } else {
+        deleteStopTopBtn.textContent = 'Delete Stop';
+      }
+    }
+  }
+
+  /**
    * Update stop list UI
    */
   function updateStopList() {
@@ -685,18 +705,13 @@ function setupUIHandlers(
           (newState as any).selectedStopIndex = index;
         }
         updateStopList();
-        // Update delete stop button after selection change
-        const deleteBtn = document.getElementById('deleteStopTopBtn') as HTMLButtonElement;
-        if (deleteBtn) {
-          const currentState = gameEngine.getState();
-          const hasSelected = currentState.selectedStopIndex !== null && currentState.selectedStopIndex !== -1;
-          deleteBtn.disabled = !hasSelected;
-          deleteBtn.textContent = hasSelected ? `Delete Stop ${currentState.selectedStopIndex + 1}` : 'Delete Stop';
-        }
       });
 
       stopListContainer.appendChild(stopItem);
     });
+
+    // Update delete stop button state
+    updateDeleteStopButton();
   }
 
   /**
@@ -1060,22 +1075,6 @@ function setupUIHandlers(
 
   // Delete Stop button (top bar)
   const deleteStopTopBtn = document.getElementById('deleteStopTopBtn') as HTMLButtonElement;
-
-  function updateDeleteStopButton() {
-    const state = gameEngine.getState();
-    const hasSelectedStop = state.selectedStopIndex !== null && state.selectedStopIndex !== -1;
-    const hasRoute = state.routes.length > 0;
-
-    if (deleteStopTopBtn) {
-      deleteStopTopBtn.disabled = !hasSelectedStop || !hasRoute;
-      if (hasSelectedStop && hasRoute) {
-        const stopNum = state.selectedStopIndex + 1;
-        deleteStopTopBtn.textContent = `Delete Stop ${stopNum}`;
-      } else {
-        deleteStopTopBtn.textContent = 'Delete Stop';
-      }
-    }
-  }
 
   if (deleteStopTopBtn) {
     deleteStopTopBtn.addEventListener('click', () => {
