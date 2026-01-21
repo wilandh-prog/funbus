@@ -222,6 +222,13 @@ export const gameToasts = {
 
   gameSaved: () =>
     toastSuccess('Progress saved', '💾'),
+
+  // Bankruptcy events
+  forcedLoan: (amount: number) =>
+    toastWarning(`Emergency loan: $${amount}`, '🏦'),
+
+  bankrupt: () =>
+    toastError('BANKRUPT - Game Over', '💀'),
 };
 
 /**

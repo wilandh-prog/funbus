@@ -8,6 +8,8 @@ import { RouteManager } from './RouteManager';
 import { getCityById } from '../config/cities';
 import { StatsCalculator } from '../ui/StatsCalculator';
 
+export type BankruptcyCallback = (event: 'forced_loan' | 'game_over', amount?: number) => void;
+
 export class GameEngine {
   private state: GameState;
   private pathfindingManager: PathfindingManager;
@@ -18,6 +20,7 @@ export class GameEngine {
   private lastTime: number = 0;
   private animationFrameId: number | null = null;
   private cityId: string;
+  private bankruptcyCallback: BankruptcyCallback | null = null;
 
   constructor(cityId: string) {
     // Get city configuration
@@ -80,6 +83,7 @@ export class GameEngine {
       selectedStopIndex: null,
       interactionMode: 'direct',
       paused: false,
+      gameOver: false,
     };
 
     // Initialize traffic density based on starting time
@@ -279,6 +283,9 @@ export class GameEngine {
     this.state.economics.money -= runningCost;
     this.state.economics.totalExpenses += runningCost;
     this.state.economics.busRunningCosts += runningCost;
+
+    // Check for bankruptcy after running costs
+    this.checkBankruptcy();
   }
 
   /**
@@ -484,6 +491,9 @@ export class GameEngine {
       this.state.economics.totalExpenses += interest;
       this.state.economics.loanInterestExpense += interest;
       console.log(`💰 Daily loan interest: $${Math.round(interest)} (Total loan: $${Math.round(this.state.economics.loan)})`);
+
+      // Check for bankruptcy after interest
+      this.checkBankruptcy();
     }
 
     // Calculate depreciation (non-cash expense for income statement)
@@ -578,6 +588,49 @@ export class GameEngine {
     this.state.economics.money -= amount;
     console.log(`✓ Repaid $${amount}. Remaining loan: $${Math.round(this.state.economics.loan)}`);
     return true;
+  }
+
+  /**
+   * Set callback for bankruptcy events (forced loans and game over)
+   */
+  onBankruptcy(callback: BankruptcyCallback): void {
+    this.bankruptcyCallback = callback;
+  }
+
+  /**
+   * Check if player is bankrupt and handle forced loans or game over
+   */
+  private checkBankruptcy(): void {
+    if (this.state.gameOver) return;
+    if (this.state.economics.money >= 0) return;
+
+    const deficit = Math.abs(this.state.economics.money);
+    const available = this.getAvailableLoan();
+
+    if (available >= deficit) {
+      // Take forced loan to cover deficit (round up to nearest 100 for buffer)
+      const loanAmount = Math.ceil(deficit / 100) * 100;
+      const actualLoan = Math.min(loanAmount, available);
+
+      this.state.economics.loan += actualLoan;
+      this.state.economics.money += actualLoan;
+
+      console.log(`⚠️ Forced loan: $${actualLoan} (deficit: $${deficit.toFixed(2)})`);
+
+      if (this.bankruptcyCallback) {
+        this.bankruptcyCallback('forced_loan', actualLoan);
+      }
+    } else {
+      // Game over - can't cover deficit
+      this.state.gameOver = true;
+      this.state.paused = true;
+
+      console.log(`💀 BANKRUPT! Deficit: $${deficit.toFixed(2)}, Available loan: $${available.toFixed(2)}`);
+
+      if (this.bankruptcyCallback) {
+        this.bankruptcyCallback('game_over', deficit);
+      }
+    }
   }
 
   /**

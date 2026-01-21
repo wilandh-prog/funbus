@@ -44,6 +44,7 @@ export interface GameState {
   selectedStopIndex: number | null;
   interactionMode: 'menu-based' | 'direct';
   paused: boolean;
+  gameOver: boolean;
 }
 
 export interface ViewportState {

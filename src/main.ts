@@ -20,6 +20,60 @@ import { startTutorial, shouldShowTutorial, resetTutorial } from './ui/Tutorial'
 const MAX_STOPS = 40;
 
 /**
+ * Show game over modal when player goes bankrupt
+ */
+function showGameOverModal(onReturnToMenu: () => void): void {
+  // Create overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'confirm-dialog-overlay';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+
+  // Create dialog
+  const dialog = document.createElement('div');
+  dialog.className = 'confirm-dialog';
+
+  // Title
+  const titleEl = document.createElement('h3');
+  titleEl.className = 'confirm-dialog-title';
+  titleEl.textContent = 'Game Over';
+  titleEl.style.color = '#e74c3c';
+
+  // Message
+  const messageEl = document.createElement('p');
+  messageEl.className = 'confirm-dialog-message';
+  messageEl.textContent = 'Your company has gone bankrupt. You ran out of money and could not secure additional loans.';
+
+  // Buttons container
+  const buttonsEl = document.createElement('div');
+  buttonsEl.className = 'confirm-dialog-buttons';
+
+  // Return to menu button
+  const menuBtn = document.createElement('button');
+  menuBtn.className = 'confirm-dialog-btn confirm primary';
+  menuBtn.textContent = 'Return to Menu';
+  menuBtn.addEventListener('click', () => {
+    overlay.remove();
+    onReturnToMenu();
+  });
+
+  // Assemble dialog
+  buttonsEl.appendChild(menuBtn);
+  dialog.appendChild(titleEl);
+  dialog.appendChild(messageEl);
+  dialog.appendChild(buttonsEl);
+  overlay.appendChild(dialog);
+
+  // Add to DOM
+  document.body.appendChild(overlay);
+
+  // Focus button
+  requestAnimationFrame(() => {
+    menuBtn.focus();
+  });
+}
+
+/**
  * Main application entry point
  */
 async function main() {
@@ -92,6 +146,20 @@ async function startGame(cityId: string, progression: ProgressionData, startFres
   // Initialize game engine WITH CITY ID
   const gameEngine = new GameEngine(cityId);
   console.log('✓ Game engine initialized');
+
+  // Set up bankruptcy callback
+  gameEngine.onBankruptcy((event, amount) => {
+    if (event === 'forced_loan' && amount) {
+      gameToasts.forcedLoan(amount);
+    } else if (event === 'game_over') {
+      gameToasts.bankrupt();
+      showGameOverModal(() => {
+        // Return to menu
+        gameEngine.stop();
+        showCitySelectionMenu(progression);
+      });
+    }
+  });
 
   // Initialize stats calculator
   const statsCalculator = new StatsCalculator();
@@ -1253,7 +1321,11 @@ function setupUIHandlers(
         return;
       }
 
-      gameEngine.addBusToRoute(state.activeRouteIndex);
+      const success = gameEngine.addBusToRoute(state.activeRouteIndex);
+      if (!success) {
+        gameToasts.notEnoughMoney(300);
+        return;
+      }
       updateBusCount();
       gameToasts.busAdded(activeRoute.buses.length);
     }
@@ -1404,7 +1476,7 @@ function setupUIHandlers(
         // Add new stop
         const success = gameEngine.addStopToRoute(state.activeRouteIndex, currentMenuGridX, currentMenuGridY);
         if (!success) {
-          console.warn('Failed to add stop - not enough money');
+          gameToasts.notEnoughMoney(100);
           hideMiniMenu();
           return;
         }
@@ -1425,8 +1497,13 @@ function setupUIHandlers(
         updateRouteTabs();
         updateStopList();
 
+        gameToasts.stopAdded(activeRoute.stops.length);
+
         // Hide menu after action
         isHoveringMenu = false;
+        hideMiniMenu();
+      } else {
+        gameToasts.maxStopsReached();
         hideMiniMenu();
       }
     }

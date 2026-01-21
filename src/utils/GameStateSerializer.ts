@@ -109,6 +109,8 @@ export function restoreGameState(gameEngine: GameEngine, savedState: Serializabl
   state.lastSpawnTime = 0;
   state.lastTrafficSpawnTime = 0;
   state.selectedStopIndex = null;
+  state.paused = false;
+  state.gameOver = false;
 
   // Recalculate traffic density based on time of day (now dynamic)
   // Note: This requires access to GameEngine's calculateTrafficDensity, but we'll let the engine recalculate it
