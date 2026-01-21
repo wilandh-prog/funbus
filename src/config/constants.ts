@@ -52,6 +52,9 @@ export const ROUTE_COLORS = [
   '#8844ff', // purple
 ];
 
+// Mobile touch constants
+export const MOBILE_STOP_TOUCH_RADIUS = 45; // pixels - touch target radius for stops on mobile
+
 // Performance constants
 export const UI_UPDATE_INTERVAL = 100; // 10 Hz (throttled from 60 Hz)
 export const PATH_CACHE_SIZE = 500;

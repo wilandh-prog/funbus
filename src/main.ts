@@ -6,7 +6,7 @@ import './styles/city-selection.css';
 import { GameEngine } from './core/GameEngine';
 import { Renderer } from './rendering/Renderer';
 import { StatsCalculator } from './ui/StatsCalculator';
-import { GRID_SIZE, COLS, ROWS } from './config/constants';
+import { GRID_SIZE, COLS, ROWS, MOBILE_STOP_TOUCH_RADIUS } from './config/constants';
 import { CitySelectionMenu } from './ui/CitySelectionMenu';
 import { ProgressionStorage, type ProgressionData } from './storage/ProgressionStorage';
 import { CITIES } from './config/cities';
@@ -2008,6 +2008,75 @@ function setupUIHandlers(
   // TOUCH SUPPORT
   // ============================================
 
+  // Detect touch device
+  const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+
+  /**
+   * Find the nearest stop to a canvas position within a given radius.
+   * Returns { gridX, gridY, stopIndex } or null if no stop found.
+   */
+  function findNearestStopInRadius(
+    canvasX: number,
+    canvasY: number,
+    radius: number,
+    routeIndex?: number
+  ): { gridX: number; gridY: number; stopIndex: number } | null {
+    const state = gameEngine.getState();
+    const route = state.routes[routeIndex ?? state.activeRouteIndex];
+    if (!route) return null;
+
+    let nearest: { gridX: number; gridY: number; stopIndex: number; dist: number } | null = null;
+
+    for (let i = 0; i < route.stops.length; i++) {
+      const stop = route.stops[i];
+      // Calculate center of stop's grid cell in canvas coordinates
+      const stopCenterX = stop.x * GRID_SIZE + GRID_SIZE / 2;
+      const stopCenterY = stop.y * GRID_SIZE + GRID_SIZE / 2;
+
+      const dx = canvasX - stopCenterX;
+      const dy = canvasY - stopCenterY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist <= radius && (nearest === null || dist < nearest.dist)) {
+        nearest = { gridX: stop.x, gridY: stop.y, stopIndex: i, dist };
+      }
+    }
+
+    return nearest ? { gridX: nearest.gridX, gridY: nearest.gridY, stopIndex: nearest.stopIndex } : null;
+  }
+
+  /**
+   * Find the nearest stop across all routes within a given radius.
+   * Returns array of { routeIndex, stopIndex, gridX, gridY } sorted by distance.
+   */
+  function findNearestStopsAcrossRoutes(
+    canvasX: number,
+    canvasY: number,
+    radius: number
+  ): Array<{ routeIndex: number; stopIndex: number; gridX: number; gridY: number; dist: number }> {
+    const state = gameEngine.getState();
+    const results: Array<{ routeIndex: number; stopIndex: number; gridX: number; gridY: number; dist: number }> = [];
+
+    for (let r = 0; r < state.routes.length; r++) {
+      const route = state.routes[r];
+      for (let i = 0; i < route.stops.length; i++) {
+        const stop = route.stops[i];
+        const stopCenterX = stop.x * GRID_SIZE + GRID_SIZE / 2;
+        const stopCenterY = stop.y * GRID_SIZE + GRID_SIZE / 2;
+
+        const dx = canvasX - stopCenterX;
+        const dy = canvasY - stopCenterY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist <= radius) {
+          results.push({ routeIndex: r, stopIndex: i, gridX: stop.x, gridY: stop.y, dist });
+        }
+      }
+    }
+
+    return results.sort((a, b) => a.dist - b.dist);
+  }
+
   // Initialize touch handler for mobile support
   const touchHandler = new TouchHandler({
     canvas,
@@ -2018,12 +2087,21 @@ function setupUIHandlers(
       const state = gameEngine.getState();
       if (state.routes.length === 0) return;
 
-      const gridX = Math.floor(canvasX / GRID_SIZE);
-      const gridY = Math.floor(canvasY / GRID_SIZE);
+      let gridX = Math.floor(canvasX / GRID_SIZE);
+      let gridY = Math.floor(canvasY / GRID_SIZE);
 
       // Update cursor position for money indicator
       lastCursorX = clientX;
       lastCursorY = clientY;
+
+      // On touch devices, snap to nearest stop if within touch radius
+      if (isTouchDevice && state.interactionMode === 'direct') {
+        const nearestStop = findNearestStopInRadius(canvasX, canvasY, MOBILE_STOP_TOUCH_RADIUS);
+        if (nearestStop) {
+          gridX = nearestStop.gridX;
+          gridY = nearestStop.gridY;
+        }
+      }
 
       if (gridX >= 0 && gridX < COLS && gridY >= 0 && gridY < ROWS) {
         if (state.cityGrid[gridY][gridX] === 'road') {
@@ -2044,8 +2122,17 @@ function setupUIHandlers(
       const state = gameEngine.getState();
       if (state.routes.length === 0) return;
 
-      const gridX = Math.floor(canvasX / GRID_SIZE);
-      const gridY = Math.floor(canvasY / GRID_SIZE);
+      let gridX = Math.floor(canvasX / GRID_SIZE);
+      let gridY = Math.floor(canvasY / GRID_SIZE);
+
+      // On touch devices, snap to nearest stop across all routes if within touch radius
+      if (isTouchDevice && state.interactionMode === 'direct') {
+        const nearestStops = findNearestStopsAcrossRoutes(canvasX, canvasY, MOBILE_STOP_TOUCH_RADIUS);
+        if (nearestStops.length > 0) {
+          gridX = nearestStops[0].gridX;
+          gridY = nearestStops[0].gridY;
+        }
+      }
 
       if (gridX >= 0 && gridX < COLS && gridY >= 0 && gridY < ROWS) {
         if (state.cityGrid[gridY][gridX] === 'road') {
@@ -2069,19 +2156,32 @@ function setupUIHandlers(
       if (state.routes.length === 0) return;
       if (state.interactionMode !== 'direct') return;
 
-      const gridX = Math.floor(canvasX / GRID_SIZE);
-      const gridY = Math.floor(canvasY / GRID_SIZE);
+      let gridX = Math.floor(canvasX / GRID_SIZE);
+      let gridY = Math.floor(canvasY / GRID_SIZE);
+      let stopIndex = -1;
 
-      // Check if the active route has a stop here
-      const activeRoute = state.routes[state.activeRouteIndex];
-      const activeRouteStopIndex = activeRoute.stops.findIndex(
-        (s) => s.x === gridX && s.y === gridY
-      );
+      // On touch devices, snap to nearest stop if within touch radius
+      if (isTouchDevice) {
+        const nearestStop = findNearestStopInRadius(canvasX, canvasY, MOBILE_STOP_TOUCH_RADIUS);
+        if (nearestStop) {
+          gridX = nearestStop.gridX;
+          gridY = nearestStop.gridY;
+          stopIndex = nearestStop.stopIndex;
+        }
+      }
 
-      if (activeRouteStopIndex !== -1) {
+      // Check if the active route has a stop here (for non-touch or if no snap happened)
+      if (stopIndex === -1) {
+        const activeRoute = state.routes[state.activeRouteIndex];
+        stopIndex = activeRoute.stops.findIndex(
+          (s) => s.x === gridX && s.y === gridY
+        );
+      }
+
+      if (stopIndex !== -1) {
         // Start dragging this stop
         dragState.active = true;
-        dragState.stopIndex = activeRouteStopIndex;
+        dragState.stopIndex = stopIndex;
         dragState.routeIndex = state.activeRouteIndex;
         dragState.startX = gridX;
         dragState.startY = gridY;
@@ -2090,7 +2190,7 @@ function setupUIHandlers(
         dragState.hasMoved = false;
 
         // Select the stop
-        (state as any).selectedStopIndex = activeRouteStopIndex;
+        (state as any).selectedStopIndex = stopIndex;
         updateStopList();
       }
     },
