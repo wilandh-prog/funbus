@@ -705,6 +705,72 @@
     cursor: not-allowed;
 }
 
+/* Pricing Control */
+.pricing-control {
+    margin-top: 8px;
+}
+
+.pricing-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.pricing-label {
+    color: #aaa;
+    font-size: 12px;
+}
+
+.pricing-value {
+    color: #4ade80;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.ticket-slider {
+    width: 100%;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #333;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+}
+
+.ticket-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background: #4ade80;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.ticket-slider::-webkit-slider-thumb:hover {
+    background: #6ee7a0;
+}
+
+.ticket-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background: #4ade80;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+
+.pricing-hint {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 10px;
+    color: #666;
+}
+
 /* Top Bar Money Display */
 .top-bar-money {
     display: flex;

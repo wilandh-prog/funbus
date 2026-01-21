@@ -1,5 +1,5 @@
 import type { GameState } from '../types/game';
-import { ROUTE_COLORS, TRAFFIC_SPAWN_INTERVAL, MAX_ROUTES, STARTING_MONEY, ROUTE_COST, STOP_COST, BUS_COST, BUS_RUNNING_COST_PER_SECOND, LOAN_TO_EQUITY_RATIO, LOAN_INTEREST_PER_DAY, BUS_DEPRECIATION_PER_DAY, ROUTE_DEPRECIATION_PER_DAY, STOP_DEPRECIATION_PER_DAY } from '../config/constants';
+import { ROUTE_COLORS, TRAFFIC_SPAWN_INTERVAL, MAX_ROUTES, STARTING_MONEY, ROUTE_COST, STOP_COST, BUS_COST, BUS_RUNNING_COST_PER_SECOND, LOAN_TO_EQUITY_RATIO, LOAN_INTEREST_PER_DAY, BUS_DEPRECIATION_PER_DAY, ROUTE_DEPRECIATION_PER_DAY, STOP_DEPRECIATION_PER_DAY, DEFAULT_TICKET_PRICE, MAX_TICKET_PRICE } from '../config/constants';
 import { CityGenerator } from '../city/CityGenerator';
 import { PathfindingManager } from '../pathfinding/PathfindingManager';
 import { SpatialIndex } from '../spatial/SpatialIndex';
@@ -75,6 +75,7 @@ export class GameEngine {
         loanInterestExpense: 0,
         depreciation: 0,
         totalCapitalInvested: 0,
+        ticketPrice: DEFAULT_TICKET_PRICE,
       },
       time: 0,
       timeOfDay: 0.25, // Start at 6am (morning)
@@ -237,12 +238,30 @@ export class GameEngine {
     // Calculate current score to determine dynamic NPC limit and spawn rate
     const currentScore = this.statsCalculator.calculateScore(this.state);
     // Scale from 10 NPCs at score 0 to 40 NPCs at score 100
-    const dynamicMaxNPCs = Math.floor(10 + (currentScore / 100) * 30);
+    const baseMaxNPCs = Math.floor(10 + (currentScore / 100) * 30);
     // Scale spawn interval: 5s at score 0, down to 2s at score 100 (faster spawning at higher scores)
-    const dynamicSpawnInterval = 5000 - (currentScore / 100) * 3000;
+    const baseSpawnInterval = 5000 - (currentScore / 100) * 3000;
 
-    // Spawn NPCs periodically with score-based limit and rate
+    // Calculate spawn multiplier based on ticket price
+    // $0 = 3x, $1.5 = 1x, $4 = 0.2x
+    const ticketPrice = this.state.economics.ticketPrice;
+    let priceSpawnMultiplier: number;
+    if (ticketPrice <= DEFAULT_TICKET_PRICE) {
+      // From 3x at $0 to 1x at default price
+      priceSpawnMultiplier = 3 - (ticketPrice / DEFAULT_TICKET_PRICE) * 2;
+    } else {
+      // From 1x at default to 0.2x at max price
+      const priceRange = MAX_TICKET_PRICE - DEFAULT_TICKET_PRICE;
+      priceSpawnMultiplier = Math.max(0.2, 1 - (ticketPrice - DEFAULT_TICKET_PRICE) / priceRange * 0.8);
+    }
+
+    // Apply price multiplier to NPC limits and spawn rate
+    const dynamicMaxNPCs = Math.floor(baseMaxNPCs * priceSpawnMultiplier);
+    const dynamicSpawnInterval = priceSpawnMultiplier > 0 ? baseSpawnInterval / priceSpawnMultiplier : Infinity;
+
+    // Spawn NPCs periodically with score-based limit and rate (affected by ticket price)
     if (
+      priceSpawnMultiplier > 0 &&
       this.state.time - this.state.lastSpawnTime > dynamicSpawnInterval &&
       this.state.npcs.length < dynamicMaxNPCs
     ) {
@@ -595,6 +614,13 @@ export class GameEngine {
    */
   onBankruptcy(callback: BankruptcyCallback): void {
     this.bankruptcyCallback = callback;
+  }
+
+  /**
+   * Set ticket price (affects income per trip and NPC spawn rate)
+   */
+  setTicketPrice(price: number): void {
+    this.state.economics.ticketPrice = Math.max(0, Math.min(MAX_TICKET_PRICE, price));
   }
 
   /**

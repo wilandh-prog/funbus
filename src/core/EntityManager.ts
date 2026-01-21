@@ -2,7 +2,7 @@ import type { GameState } from '../types/game';
 import type { NPC, TrafficVehicle, VehicleType, Zone } from '../types/entities';
 import type { RoadCell } from '../types/city';
 import { ZoneType } from '../types/city';
-import { GRID_SIZE, COLS, ROWS, NPC_MAX_WAIT_TIME, TRAFFIC_SPEED, TRIP_INCOME } from '../config/constants';
+import { GRID_SIZE, COLS, ROWS, NPC_MAX_WAIT_TIME, TRAFFIC_SPEED } from '../config/constants';
 import { PathfindingManager } from '../pathfinding/PathfindingManager';
 import { SpatialIndex } from '../spatial/SpatialIndex';
 import { RoutePlanner } from '../pathfinding/RoutePlanner';
@@ -353,9 +353,9 @@ export class EntityManager {
                         state.stats.tripsCompleted++;
                         state.stats.totalWaitTime += npc.waitTime;
                         // Track transport time (NPC already at destination, so transport time is 0)
-                        // Add trip income
-                        state.economics.money += TRIP_INCOME;
-                        state.economics.totalIncome += TRIP_INCOME;
+                        // Add trip income based on ticket price
+                        state.economics.money += state.economics.ticketPrice;
+                        state.economics.totalIncome += state.economics.ticketPrice;
                       } else {
                         // Plan the trip
                         const plan = this.routePlanner.planTrip(
@@ -444,9 +444,9 @@ export class EntityManager {
                 state.stats.tripsCompleted++;
                 state.stats.totalWaitTime += npc.waitTime;
                 // Track transport time (NPC already at destination, so transport time is 0)
-                // Add trip income
-                state.economics.money += TRIP_INCOME;
-                state.economics.totalIncome += TRIP_INCOME;
+                // Add trip income based on ticket price
+                state.economics.money += state.economics.ticketPrice;
+                state.economics.totalIncome += state.economics.ticketPrice;
                 console.log('✓ NPC arrived (already at dest stop)', {
                   stop: { x: npc.nearestStop.x, y: npc.nearestStop.y },
                   waitTime: npc.waitTime.toFixed(1) + 's',

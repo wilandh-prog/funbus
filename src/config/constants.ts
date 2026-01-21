@@ -66,7 +66,8 @@ export const ROUTE_COST = 500;
 export const STOP_COST = 100;
 export const BUS_COST = 300;
 export const BUS_RUNNING_COST_PER_SECOND = 0.05; // Cost per bus per second
-export const TRIP_INCOME = 1.5; // Income per completed trip
+export const DEFAULT_TICKET_PRICE = 1.5; // Default ticket price
+export const MAX_TICKET_PRICE = 4; // Maximum ticket price
 
 // Loan system constants
 export const LOAN_TO_EQUITY_RATIO = 2.0; // Can borrow up to 2x equity

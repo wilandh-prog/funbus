@@ -24,6 +24,8 @@ export interface Economics {
   depreciation: number; // Accumulated depreciation (non-cash)
   // Balance sheet items
   totalCapitalInvested: number; // Total invested in buses, routes, stops (at cost)
+  // Pricing
+  ticketPrice: number; // Current ticket price (affects income and NPC spawn rate)
 }
 
 export interface GameState {

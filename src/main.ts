@@ -1286,6 +1286,21 @@ function setupUIHandlers(
     }
   });
 
+  // Ticket price slider
+  const ticketPriceSlider = document.getElementById('ticketPriceSlider') as HTMLInputElement;
+  const ticketPriceValue = document.getElementById('ticketPriceValue')!;
+
+  // Initialize slider with current ticket price
+  const initialPrice = gameEngine.getState().economics.ticketPrice;
+  ticketPriceSlider.value = initialPrice.toString();
+  ticketPriceValue.textContent = initialPrice === 0 ? 'Free' : `$${initialPrice.toFixed(2)}`;
+
+  ticketPriceSlider.addEventListener('input', () => {
+    const price = parseFloat(ticketPriceSlider.value);
+    gameEngine.setTicketPrice(price);
+    ticketPriceValue.textContent = price === 0 ? 'Free' : `$${price.toFixed(2)}`;
+  });
+
   /**
    * Update bus count display (top bar)
    */

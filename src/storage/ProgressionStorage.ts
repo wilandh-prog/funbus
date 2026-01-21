@@ -27,6 +27,7 @@ export interface SerializableGameState {
     money: number;
     totalIncome: number;
     totalExpenses: number;
+    ticketPrice?: number;
   };
   interactionMode: 'menu-based' | 'direct';
 }

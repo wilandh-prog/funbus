@@ -8,6 +8,7 @@
 import type { GameState } from '../types/game';
 import type { SerializableGameState } from '../storage/ProgressionStorage';
 import type { GameEngine } from '../core/GameEngine';
+import { DEFAULT_TICKET_PRICE } from '../config/constants';
 
 /**
  * Serialize game state for storage
@@ -27,6 +28,7 @@ export function serializeGameState(state: GameState): SerializableGameState {
       money: state.economics.money,
       totalIncome: state.economics.totalIncome,
       totalExpenses: state.economics.totalExpenses,
+      ticketPrice: state.economics.ticketPrice,
     },
     interactionMode: state.interactionMode,
   };
@@ -98,6 +100,7 @@ export function restoreGameState(gameEngine: GameEngine, savedState: Serializabl
     state.economics.money = savedState.economics.money;
     state.economics.totalIncome = savedState.economics.totalIncome;
     state.economics.totalExpenses = savedState.economics.totalExpenses;
+    state.economics.ticketPrice = savedState.economics.ticketPrice ?? DEFAULT_TICKET_PRICE;
   }
   state.interactionMode = savedState.interactionMode;
 

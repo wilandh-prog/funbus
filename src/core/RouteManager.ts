@@ -3,7 +3,6 @@ import type { Route, Stop, Bus } from '../types/entities';
 import {
   GRID_SIZE,
   BUS_SPEED,
-  TRIP_INCOME,
   TRAFFIC_BASE_SPEED_MULTIPLIER,
   CONGESTION_DETECTION_RADIUS,
   CONGESTION_SLOWDOWN_PER_VEHICLE,
@@ -376,9 +375,9 @@ export class RouteManager {
               const transportTime = (state.time - passenger.transportStartTime) / 1000; // Convert to seconds
               state.stats.totalTransportTime += transportTime;
             }
-            // Add trip income
-            state.economics.money += TRIP_INCOME;
-            state.economics.totalIncome += TRIP_INCOME;
+            // Add trip income based on ticket price
+            state.economics.money += state.economics.ticketPrice;
+            state.economics.totalIncome += state.economics.ticketPrice;
             console.log('✓ NPC arrived at final destination', {
               stop: { x: currentStop.x, y: currentStop.y },
               totalWaitTime: passenger.waitTime.toFixed(1) + 's',
