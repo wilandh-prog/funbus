@@ -18,6 +18,13 @@ export class UILayer {
   private isDragging: boolean = false;
   private dragRouteIndex: number = -1;
   private dragStopIndex: number = -1;
+  private selectedStopX: number = -1;
+  private selectedStopY: number = -1;
+  private isTouchDevice: boolean = false;
+
+  constructor() {
+    this.isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+  }
 
   /**
    * Update hover state
@@ -41,6 +48,22 @@ export class UILayer {
   clearMenuTarget(): void {
     this.menuTargetGridX = -1;
     this.menuTargetGridY = -1;
+  }
+
+  /**
+   * Set selected stop (for mobile tooltip display)
+   */
+  setSelectedStop(gridX: number, gridY: number): void {
+    this.selectedStopX = gridX;
+    this.selectedStopY = gridY;
+  }
+
+  /**
+   * Clear selected stop
+   */
+  clearSelectedStop(): void {
+    this.selectedStopX = -1;
+    this.selectedStopY = -1;
   }
 
   /**
@@ -253,15 +276,30 @@ export class UILayer {
   }
 
   private renderStopTooltip(ctx: CanvasRenderingContext2D, state: GameState): void {
-    // Only show tooltip when hovering (not when menu is open or dragging)
+    // Don't show tooltip when menu is open or dragging
     if (this.menuTargetGridX >= 0 && this.menuTargetGridY >= 0) return;
     if (this.isDragging) return;
-    if (this.hoveredGridX < 0 || this.hoveredGridY < 0) return;
+
+    // Determine which stop to show tooltip for:
+    // - On touch devices: use selected stop
+    // - On desktop: use hovered stop
+    let targetX = -1;
+    let targetY = -1;
+
+    if (this.isTouchDevice && this.selectedStopX >= 0 && this.selectedStopY >= 0) {
+      targetX = this.selectedStopX;
+      targetY = this.selectedStopY;
+    } else if (this.hoveredGridX >= 0 && this.hoveredGridY >= 0) {
+      targetX = this.hoveredGridX;
+      targetY = this.hoveredGridY;
+    }
+
+    if (targetX < 0 || targetY < 0) return;
 
     // Find if there's a stop at this location
     let hoveredStop = null;
     for (const route of state.routes) {
-      const stop = route.stops.find(s => s.x === this.hoveredGridX && s.y === this.hoveredGridY);
+      const stop = route.stops.find(s => s.x === targetX && s.y === targetY);
       if (stop) {
         hoveredStop = stop;
         break;
@@ -281,8 +319,8 @@ export class UILayer {
     if (npcsAtStop.length === 0) return;
 
     // Calculate tooltip position
-    const stopPixelX = this.hoveredGridX * GRID_SIZE + GRID_SIZE / 2;
-    const stopPixelY = this.hoveredGridY * GRID_SIZE + GRID_SIZE / 2;
+    const stopPixelX = targetX * GRID_SIZE + GRID_SIZE / 2;
+    const stopPixelY = targetY * GRID_SIZE + GRID_SIZE / 2;
 
     // Prepare tooltip content
     const lineHeight = 18;

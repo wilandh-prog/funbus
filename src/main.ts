@@ -666,6 +666,17 @@ function setupUIHandlers(
         deleteStopTopBtn.textContent = 'Delete Stop';
       }
     }
+
+    // Update UILayer with selected stop for mobile tooltip
+    if (hasSelectedStop && hasRoute) {
+      const activeRoute = state.routes[state.activeRouteIndex];
+      const selectedStop = activeRoute.stops[state.selectedStopIndex];
+      if (selectedStop) {
+        renderer.getUILayer().setSelectedStop(selectedStop.x, selectedStop.y);
+      }
+    } else {
+      renderer.getUILayer().clearSelectedStop();
+    }
   }
 
   /**
