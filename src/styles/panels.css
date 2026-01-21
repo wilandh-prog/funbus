@@ -981,6 +981,20 @@
     }
 
     .top-bar-money {
-        display: none;
+        display: flex;
+        padding: 6px 12px;
+        background: linear-gradient(135deg, #1a3a1a 0%, #2a2a2a 100%);
+        border: 2px solid #4ade80;
+        border-radius: 8px;
+        gap: 6px;
+    }
+
+    .money-label {
+        display: none; /* Hide "Money:" label on mobile to save space */
+    }
+
+    .money-value {
+        font-size: 16px;
+        font-weight: bold;
     }
 }
