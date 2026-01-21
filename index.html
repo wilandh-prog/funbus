@@ -45,7 +45,7 @@
                 <div class="sidebar-section-content">
                 <div id="ui">
                     <div class="stat overall-score">
-                        <div class="stat-label">Score</div>
+                        <div class="stat-label">Happiness</div>
                         <div class="stat-value" id="overallScore">0</div>
                     </div>
 
@@ -305,7 +305,7 @@
 
             <p>Each bus loops through its route's stops independently, picking up NPCs and dropping them near their destinations. NPCs board any bus that takes them closer to their destination. NPCs wait max 60s before giving up.</p>
 
-            <p><strong>Score System (0-100):</strong> Success Rate (30pts) + Low Wait Times (30pts) + Fast Transport (20pts) + Coverage (20pts). Focused on NPC happiness - did they reach their destination quickly without waiting too long? Green = Excellent (70+), Yellow = Good (40+), Red = Needs Work.</p>
+            <p><strong>Happiness Score (0-100):</strong> Success Rate (30pts) + Low Wait Times (30pts) + Fast Transport (20pts) + Coverage (20pts). Measures NPC happiness - did they reach their destination quickly without waiting too long? Green = Excellent (70+), Yellow = Good (40+), Red = Needs Work.</p>
 
             <p><strong>Route Efficiency:</strong> Shown separately in stats panel. Measures route design quality based on stop spacing (5-8 grid cells optimal), optimal route length (6-10 stops ideal), bus-to-stop ratio (1 bus per 5 stops), and route compactness (not too sprawling).</p>
 
@@ -313,7 +313,7 @@
 
             <p><strong>Visual Feedback:</strong></p>
             <ul>
-                <li><strong>Coverage Radius:</strong> Green dashed circles show each stop's service area (4 grid cells). Zones within this radius count toward your coverage score.</li>
+                <li><strong>Coverage Radius:</strong> Green dashed circles show each stop's service area (4 grid cells). Zones within this radius count toward your happiness score.</li>
                 <li><strong>Bus Speed Indicators:</strong> Colored rings around moving buses show their current speed - Green (full speed), Yellow (medium), Orange (slow), Red (very slow from traffic).</li>
             </ul>
 
