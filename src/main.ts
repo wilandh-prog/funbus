@@ -113,6 +113,11 @@ async function startGame(cityId: string, progression: ProgressionData, startFres
   // Set up UI event handlers WITH RETURN TO MENU CALLBACK
   const uiHandlers = setupUIHandlers(gameEngine, renderer, statsCalculator, {
     onReturnToMenu: () => {
+      // Clean up auto-save before saving final state
+      if ((window as any).__cleanupAutoSave) {
+        (window as any).__cleanupAutoSave();
+      }
+
       // Calculate final score
       const state = gameEngine.getState();
       const score = statsCalculator.calculateScore(state);
@@ -166,6 +171,42 @@ async function startGame(cityId: string, progression: ProgressionData, startFres
   });
 
   console.log('✓ Game started!');
+
+  // Auto-save functionality
+  const saveCurrentGame = () => {
+    const state = gameEngine.getState();
+    const currentState = serializeGameState(state);
+    ProgressionStorage.saveGameState(progression, cityId, currentState);
+    ProgressionStorage.save(progression);
+    console.log('Game auto-saved');
+  };
+
+  // Auto-save every 30 seconds
+  const autoSaveInterval = setInterval(saveCurrentGame, 30000);
+
+  // Save when tab is hidden or page is being closed
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === 'hidden') {
+      saveCurrentGame();
+    }
+  };
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+
+  // Save before page unload
+  const handleBeforeUnload = () => {
+    saveCurrentGame();
+  };
+  window.addEventListener('beforeunload', handleBeforeUnload);
+
+  // Clean up auto-save when returning to menu
+  const cleanupAutoSave = () => {
+    clearInterval(autoSaveInterval);
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+    window.removeEventListener('beforeunload', handleBeforeUnload);
+  };
+
+  // Store cleanup function for use in onReturnToMenu
+  (window as any).__cleanupAutoSave = cleanupAutoSave;
 
   // Show tutorial for first-time users (after a short delay to let the game render)
   if (shouldShowTutorial()) {
