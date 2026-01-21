@@ -465,22 +465,35 @@ h1 {
     color: #60a5fa;
 }
 
-/* Mobile positioning */
+/* Mobile positioning - compact toasts at top */
 @media (max-width: 768px) {
     #toast-container {
         left: 10px;
         right: 10px;
-        bottom: 80px;
+        bottom: auto;
+        top: 70px;
         max-width: none;
     }
 
     .toast {
+        font-size: 12px;
+        padding: 8px 12px;
+        gap: 6px;
+    }
+
+    .toast-icon {
         font-size: 14px;
+    }
+
+    .toast-close {
+        width: 24px;
+        height: 24px;
+        font-size: 16px;
     }
 }
 
 /* Touch-friendly close button */
-@media (pointer: coarse) {
+@media (pointer: coarse) and (min-width: 769px) {
     .toast-close {
         width: 32px;
         height: 32px;
