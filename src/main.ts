@@ -1969,14 +1969,18 @@ function setupUIHandlers(
   updateZoomLevel();
 
   // Prevent touch events on UI controls from affecting the canvas
-  const uiControls = [
+  // Note: top-bar only uses stopPropagation (not preventDefault) to allow scrolling route tabs
+  const uiControlsWithPreventDefault = [
     document.getElementById('zoom-controls'),
     document.getElementById('pan-controls'),
     document.getElementById('sidebarToggle'),
+  ];
+
+  const uiControlsScrollable = [
     document.getElementById('top-bar'),
   ];
 
-  uiControls.forEach((control) => {
+  uiControlsWithPreventDefault.forEach((control) => {
     if (control) {
       control.addEventListener('touchstart', (e) => {
         e.stopPropagation();
@@ -1985,6 +1989,21 @@ function setupUIHandlers(
         e.stopPropagation();
         e.preventDefault();
       }, { passive: false });
+      control.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+      }, { passive: true });
+    }
+  });
+
+  // For scrollable UI controls, only stop propagation (allow default scroll behavior)
+  uiControlsScrollable.forEach((control) => {
+    if (control) {
+      control.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+      }, { passive: true });
+      control.addEventListener('touchmove', (e) => {
+        e.stopPropagation();
+      }, { passive: true });
       control.addEventListener('touchend', (e) => {
         e.stopPropagation();
       }, { passive: true });

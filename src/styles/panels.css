@@ -55,6 +55,7 @@
     scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: #555 transparent;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
 #routeTabs::-webkit-scrollbar {
