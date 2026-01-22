@@ -63,11 +63,13 @@ function removeToast(id: number): void {
   const toast = activeToasts[index];
   clearTimeout(toast.timeout);
 
+  // Remove from array immediately to prevent double-removal
+  activeToasts.splice(index, 1);
+
   toast.element.classList.add('toast-exit');
 
   setTimeout(() => {
     toast.element.remove();
-    activeToasts.splice(index, 1);
   }, 300);
 }
 

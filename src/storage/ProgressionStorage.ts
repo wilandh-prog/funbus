@@ -28,6 +28,11 @@ export interface SerializableGameState {
     totalIncome: number;
     totalExpenses: number;
     ticketPrice?: number;
+    loan?: number;
+    loanInterestExpense?: number;
+    depreciation?: number;
+    busRunningCosts?: number;
+    totalCapitalInvested?: number;
   };
   interactionMode: 'menu-based' | 'direct';
 }

@@ -70,8 +70,8 @@ export const DEFAULT_TICKET_PRICE = 1.5; // Default ticket price
 export const MAX_TICKET_PRICE = 4; // Maximum ticket price
 
 // Loan system constants
-export const LOAN_TO_EQUITY_RATIO = 2.0; // Can borrow up to 2x equity
-export const LOAN_INTEREST_RATE = 0.10; // 10% annual interest rate
+export const LOAN_TO_EQUITY_RATIO = 1.5; // Can borrow up to 1.5x equity
+export const LOAN_INTEREST_RATE = 0.25; // 25% annual interest rate
 export const LOAN_INTEREST_PER_DAY = LOAN_INTEREST_RATE / 365; // Daily interest rate
 
 // Depreciation constants (for income statement)

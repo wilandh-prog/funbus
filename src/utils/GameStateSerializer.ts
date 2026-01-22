@@ -29,6 +29,11 @@ export function serializeGameState(state: GameState): SerializableGameState {
       totalIncome: state.economics.totalIncome,
       totalExpenses: state.economics.totalExpenses,
       ticketPrice: state.economics.ticketPrice,
+      loan: state.economics.loan,
+      loanInterestExpense: state.economics.loanInterestExpense,
+      depreciation: state.economics.depreciation,
+      busRunningCosts: state.economics.busRunningCosts,
+      totalCapitalInvested: state.economics.totalCapitalInvested,
     },
     interactionMode: state.interactionMode,
   };
@@ -101,6 +106,11 @@ export function restoreGameState(gameEngine: GameEngine, savedState: Serializabl
     state.economics.totalIncome = savedState.economics.totalIncome;
     state.economics.totalExpenses = savedState.economics.totalExpenses;
     state.economics.ticketPrice = savedState.economics.ticketPrice ?? DEFAULT_TICKET_PRICE;
+    state.economics.loan = savedState.economics.loan ?? 0;
+    state.economics.loanInterestExpense = savedState.economics.loanInterestExpense ?? 0;
+    state.economics.depreciation = savedState.economics.depreciation ?? 0;
+    state.economics.busRunningCosts = savedState.economics.busRunningCosts ?? 0;
+    state.economics.totalCapitalInvested = savedState.economics.totalCapitalInvested ?? 0;
   }
   state.interactionMode = savedState.interactionMode;
 
