@@ -122,6 +122,14 @@ function syncUIWithGameState(gameEngine: GameEngine) {
       canvas.classList.remove('direct-mode');
     }
   }
+
+  // Sync pause button state
+  const pauseBtn = document.getElementById('pause-btn');
+  if (pauseBtn) {
+    const isPaused = gameEngine.isPaused();
+    pauseBtn.textContent = isPaused ? '▶ Play' : '⏸ Pause';
+    pauseBtn.classList.toggle('paused', isPaused);
+  }
 }
 
 /**
