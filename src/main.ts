@@ -130,6 +130,14 @@ function syncUIWithGameState(gameEngine: GameEngine) {
     pauseBtn.textContent = isPaused ? '▶ Play' : '⏸ Pause';
     pauseBtn.classList.toggle('paused', isPaused);
   }
+
+  // Reset sidebar state (ensure closed on game start)
+  const leftSidebar = document.getElementById('left-sidebar');
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  if (leftSidebar && sidebarToggle) {
+    leftSidebar.classList.remove('open');
+    sidebarToggle.textContent = '☰';
+  }
 }
 
 /**
