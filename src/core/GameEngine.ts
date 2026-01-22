@@ -237,10 +237,10 @@ export class GameEngine {
 
     // Calculate current score to determine dynamic NPC limit and spawn rate
     const currentScore = this.statsCalculator.calculateScore(this.state);
-    // Scale from 10 NPCs at score 0 to 40 NPCs at score 100
-    const baseMaxNPCs = Math.floor(10 + (currentScore / 100) * 30);
-    // Scale spawn interval: 5s at score 0, down to 2s at score 100 (faster spawning at higher scores)
-    const baseSpawnInterval = 5000 - (currentScore / 100) * 3000;
+    // Scale from 10 NPCs at score 0 to 60 NPCs at score 100
+    const baseMaxNPCs = Math.floor(10 + (currentScore / 100) * 50);
+    // Scale spawn interval: 5s at score 0, down to 1s at score 100 (faster spawning at higher scores)
+    const baseSpawnInterval = 5000 - (currentScore / 100) * 4000;
 
     // Calculate spawn multiplier based on ticket price
     // $0 = 3x, $1.5 = 1x, $4 = 0.2x
