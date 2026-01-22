@@ -980,6 +980,11 @@
     display: none;
 }
 
+/* Mobile-only sections - hidden on desktop */
+.sidebar-section.mobile-only {
+    display: none;
+}
+
 @media (max-width: 768px) {
     /* Hide sidebar off-screen by default */
     #left-sidebar {
@@ -997,22 +1002,22 @@
         left: 0;
     }
 
-    /* Show sidebar toggle button on mobile */
+    /* Show sidebar toggle button on mobile - top left */
     .sidebar-toggle {
         display: flex;
         align-items: center;
         justify-content: center;
         position: fixed;
         left: 10px;
-        bottom: 20px;
+        top: 12px;
         z-index: 1501;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
         background: #2a2a2a;
         border: 2px solid #4ade80;
         color: #4ade80;
-        font-size: 24px;
+        font-size: 20px;
         cursor: pointer;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
         touch-action: manipulation;
@@ -1022,6 +1027,23 @@
         transform: scale(0.95);
     }
 
+    /* Hide Cities button from top bar on mobile */
+    .top-bar-left .return-to-menu-btn {
+        display: none;
+    }
+
+    /* Show mobile-only sections in sidebar */
+    .sidebar-section.mobile-only {
+        display: block;
+    }
+
+    /* Style for mobile Cities button in sidebar */
+    .mobile-menu-btn {
+        width: 100%;
+        padding: 12px;
+        font-size: 14px;
+    }
+
     /* Remove left margin from game area */
     #app-container {
         margin-left: 0;
@@ -1029,7 +1051,7 @@
 
     /* Top bar adjustments for mobile */
     #top-bar {
-        padding: 0 10px;
+        padding: 0 10px 0 60px; /* Left padding for hamburger button */
     }
 
     .top-bar-left {

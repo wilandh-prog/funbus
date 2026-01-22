@@ -1163,6 +1163,17 @@ function setupUIHandlers(
     });
   }
 
+  // Mobile return to menu button (in sidebar)
+  const mobileReturnBtn = document.getElementById('mobile-return-to-menu-btn');
+  if (mobileReturnBtn && callbacks?.onReturnToMenu) {
+    const newMobileReturnBtn = mobileReturnBtn.cloneNode(true) as HTMLElement;
+    mobileReturnBtn.parentNode?.replaceChild(newMobileReturnBtn, mobileReturnBtn);
+
+    newMobileReturnBtn.addEventListener('click', () => {
+      callbacks.onReturnToMenu!();
+    });
+  }
+
   // Add Route button
   const addRouteBtn = document.getElementById('addRouteBtn')!;
   addRouteBtn.addEventListener('click', () => {
