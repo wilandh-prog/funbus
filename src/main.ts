@@ -2321,7 +2321,6 @@ function setupUIHandlers(
     // Tap - equivalent to click
     onTap: (canvasX, canvasY, clientX, clientY) => {
       const state = gameEngine.getState();
-      if (state.routes.length === 0) return;
 
       let gridX = Math.floor(canvasX / GRID_SIZE);
       let gridY = Math.floor(canvasY / GRID_SIZE);
@@ -2329,6 +2328,22 @@ function setupUIHandlers(
       // Update cursor position for money indicator
       lastCursorX = clientX;
       lastCursorY = clientY;
+
+      // In pan mode, tap on stop to show info
+      if (!buildModeActive) {
+        // Snap to nearest stop if within touch radius
+        const nearestStop = findNearestStopInRadius(canvasX, canvasY, MOBILE_STOP_TOUCH_RADIUS);
+        if (nearestStop) {
+          // Set this stop as selected to show tooltip
+          renderer.getUILayer().setSelectedStop(nearestStop.gridX, nearestStop.gridY);
+        } else {
+          // Tapped elsewhere, clear selection
+          renderer.getUILayer().clearSelectedStop();
+        }
+        return;
+      }
+
+      if (state.routes.length === 0) return;
 
       // On touch devices, snap to nearest stop if within touch radius
       if (isTouchDevice && state.interactionMode === 'direct') {

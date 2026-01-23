@@ -296,27 +296,28 @@ export class UILayer {
 
     if (targetX < 0 || targetY < 0) return;
 
-    // Find if there's a stop at this location
-    let hoveredStop = null;
-    for (const route of state.routes) {
-      const stop = route.stops.find(s => s.x === targetX && s.y === targetY);
-      if (stop) {
-        hoveredStop = stop;
-        break;
+    // Find all routes that have a stop at this location
+    const routesAtStop: { routeIndex: number; stopIndex: number; color: string }[] = [];
+    state.routes.forEach((route, routeIndex) => {
+      const stopIndex = route.stops.findIndex(s => s.x === targetX && s.y === targetY);
+      if (stopIndex !== -1) {
+        routesAtStop.push({ routeIndex, stopIndex, color: route.color });
       }
-    }
+    });
 
-    if (!hoveredStop) return;
+    if (routesAtStop.length === 0) return;
+
+    // Generate stop name based on first route's stop index
+    const firstRoute = routesAtStop[0];
+    const stopName = `Stop ${String.fromCharCode(65 + firstRoute.stopIndex)}`; // A, B, C, ...
 
     // Find all waiting NPCs at this stop
     const npcsAtStop = state.npcs.filter(npc =>
       npc.state === 'waiting' &&
       npc.nearestStop &&
-      npc.nearestStop.x === hoveredStop.x &&
-      npc.nearestStop.y === hoveredStop.y
+      npc.nearestStop.x === targetX &&
+      npc.nearestStop.y === targetY
     );
-
-    if (npcsAtStop.length === 0) return;
 
     // Calculate tooltip position
     const stopPixelX = targetX * GRID_SIZE + GRID_SIZE / 2;
@@ -325,8 +326,9 @@ export class UILayer {
     // Prepare tooltip content
     const lineHeight = 18;
     const padding = 10;
-    const headerHeight = 22;
-    const maxNPCsToShow = 8; // Limit to prevent huge tooltips
+    const headerHeight = 24;
+    const routeLineHeight = 22;
+    const maxNPCsToShow = 6;
     const npcsToShow = npcsAtStop.slice(0, maxNPCsToShow);
     const hasMore = npcsAtStop.length > maxNPCsToShow;
 
@@ -334,16 +336,23 @@ export class UILayer {
     ctx.font = 'bold 12px sans-serif';
 
     // Calculate width based on longest text
-    let maxWidth = ctx.measureText('Bus Stop').width;
+    let maxWidth = ctx.measureText(`🚏 ${stopName}`).width;
+    const routesText = `Routes: ${routesAtStop.map(r => r.routeIndex + 1).join(', ')}`;
+    const routesWidth = ctx.measureText(routesText).width + 40; // Extra for badges
+    if (routesWidth > maxWidth) maxWidth = routesWidth;
+
     npcsToShow.forEach(npc => {
       const destName = npc.destinationZone.name || 'Unknown';
       const text = `${npc.name} → ${destName}`;
-      const width = ctx.measureText(text).width;
+      const width = ctx.measureText(text).width + 30;
       if (width > maxWidth) maxWidth = width;
     });
 
-    const tooltipWidth = maxWidth + padding * 2 + 30; // Extra space for mood indicator
-    const tooltipHeight = headerHeight + (npcsToShow.length * lineHeight) + (hasMore ? lineHeight : 0) + padding;
+    const tooltipWidth = Math.max(maxWidth + padding * 2, 160);
+    const npcSectionHeight = npcsToShow.length > 0
+      ? (npcsToShow.length * lineHeight) + (hasMore ? lineHeight : 0) + 10
+      : 0;
+    const tooltipHeight = headerHeight + routeLineHeight + npcSectionHeight + padding;
 
     // Position tooltip to the right of the stop
     let tooltipX = stopPixelX + 40;
@@ -353,7 +362,7 @@ export class UILayer {
     const canvasWidth = state.cityGrid[0].length * GRID_SIZE;
     const canvasHeight = state.cityGrid.length * GRID_SIZE;
     if (tooltipX + tooltipWidth > canvasWidth) {
-      tooltipX = stopPixelX - tooltipWidth - 40; // Show on left instead
+      tooltipX = stopPixelX - tooltipWidth - 40;
     }
     if (tooltipY < 0) tooltipY = 0;
     if (tooltipY + tooltipHeight > canvasHeight) tooltipY = canvasHeight - tooltipHeight;
@@ -364,7 +373,6 @@ export class UILayer {
     ctx.lineWidth = 2;
     const roundRadius = 6;
 
-    // Rounded rectangle
     ctx.beginPath();
     ctx.moveTo(tooltipX + roundRadius, tooltipY);
     ctx.lineTo(tooltipX + tooltipWidth - roundRadius, tooltipY);
@@ -379,89 +387,86 @@ export class UILayer {
     ctx.fill();
     ctx.stroke();
 
-    // Draw header
+    // Draw header with stop name
     ctx.fillStyle = '#ffcc00';
     ctx.font = 'bold 14px sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top';
-    ctx.fillText('🚏 Bus Stop', tooltipX + padding, tooltipY + padding);
+    ctx.fillText(`🚏 ${stopName}`, tooltipX + padding, tooltipY + padding);
 
-    // Draw NPCs
-    ctx.font = '11px sans-serif';
+    // Draw route badges
     let currentY = tooltipY + headerHeight + padding;
+    let badgeX = tooltipX + padding;
 
-    npcsToShow.forEach(npc => {
-      const destName = npc.destinationZone.name || 'Unknown';
+    routesAtStop.forEach((routeInfo) => {
+      const badgeRadius = 10;
+      const badgeCenterY = currentY + 2;
 
-      // Calculate mood based on wait time
-      const maxWaitTime = 60;
-      const waitProgress = npc.waitTime / maxWaitTime;
-      let moodEmoji = '😊';
-
-      if (waitProgress > 0.8) {
-        moodEmoji = '😠';
-      } else if (waitProgress > 0.5) {
-        moodEmoji = '😟';
-      }
-
-      // Determine which route this NPC is waiting for
-      let routeIndicator = '?';
-      let routeColor = '#888888';
-
-      if (npc.plannedRoute && npc.plannedRoute.routes.length > 0) {
-        const currentRouteIndex = npc.plannedRoute.routes[npc.plannedRoute.currentStopIndex];
-        if (currentRouteIndex !== undefined && state.routes[currentRouteIndex]) {
-          routeIndicator = `${currentRouteIndex + 1}`;
-          routeColor = state.routes[currentRouteIndex].color;
-        }
-      }
-
-      // Draw route indicator badge
-      const badgeX = tooltipX + padding + 8;
-      const badgeY = currentY + 7;
-      const badgeRadius = 8;
-
-      ctx.fillStyle = routeColor;
+      ctx.fillStyle = routeInfo.color;
       ctx.beginPath();
-      ctx.arc(badgeX, badgeY, badgeRadius, 0, Math.PI * 2);
+      ctx.arc(badgeX + badgeRadius, badgeCenterY, badgeRadius, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.arc(badgeX, badgeY, badgeRadius, 0, Math.PI * 2);
+      ctx.arc(badgeX + badgeRadius, badgeCenterY, badgeRadius, 0, Math.PI * 2);
       ctx.stroke();
 
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 10px sans-serif';
+      ctx.font = 'bold 11px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(routeIndicator, badgeX, badgeY);
+      ctx.fillText(`${routeInfo.routeIndex + 1}`, badgeX + badgeRadius, badgeCenterY);
 
-      // Draw NPC info
-      ctx.font = '11px sans-serif';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
-      ctx.fillStyle = '#ffffff';
-      ctx.fillText(`${npc.name}`, tooltipX + padding + 22, currentY);
-
-      // Draw destination
-      ctx.fillStyle = '#aaaaaa';
-      ctx.fillText(`→ ${destName}`, tooltipX + padding + 22 + ctx.measureText(npc.name).width + 5, currentY);
-
-      // Draw mood emoji
-      ctx.font = '14px sans-serif';
-      ctx.fillText(moodEmoji, tooltipX + tooltipWidth - padding - 16, currentY - 2);
-      ctx.font = '11px sans-serif';
-
-      currentY += lineHeight;
+      badgeX += badgeRadius * 2 + 6;
     });
 
-    // Draw "and X more..." if needed
-    if (hasMore) {
+    currentY += routeLineHeight;
+
+    // Draw NPCs section if there are any
+    if (npcsToShow.length > 0) {
       ctx.fillStyle = '#888888';
-      ctx.font = 'italic 10px sans-serif';
-      ctx.fillText(`...and ${npcsAtStop.length - maxNPCsToShow} more`, tooltipX + padding, currentY);
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText(`Waiting (${npcsAtStop.length}):`, tooltipX + padding, currentY);
+      currentY += 14;
+
+      npcsToShow.forEach(npc => {
+        const destName = npc.destinationZone.name || 'Unknown';
+
+        // Calculate mood based on wait time
+        const maxWaitTime = 60;
+        const waitProgress = npc.waitTime / maxWaitTime;
+        let moodEmoji = '😊';
+        if (waitProgress > 0.8) {
+          moodEmoji = '😠';
+        } else if (waitProgress > 0.5) {
+          moodEmoji = '😟';
+        }
+
+        // Draw NPC info
+        ctx.font = '11px sans-serif';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(`${npc.name}`, tooltipX + padding, currentY);
+
+        ctx.fillStyle = '#aaaaaa';
+        const nameWidth = ctx.measureText(npc.name).width;
+        ctx.fillText(` → ${destName}`, tooltipX + padding + nameWidth, currentY);
+
+        // Draw mood emoji
+        ctx.font = '14px sans-serif';
+        ctx.fillText(moodEmoji, tooltipX + tooltipWidth - padding - 16, currentY - 2);
+
+        currentY += lineHeight;
+      });
+
+      if (hasMore) {
+        ctx.fillStyle = '#888888';
+        ctx.font = 'italic 10px sans-serif';
+        ctx.fillText(`...+${npcsAtStop.length - maxNPCsToShow} more`, tooltipX + padding, currentY);
+      }
     }
 
     ctx.restore();
