@@ -2502,25 +2502,35 @@ function setupUIHandlers(
   // Initialize collapsible sidebar sections
   initCollapsibleSections();
 
-  // Mobile sidebar toggle
-  const sidebarToggle = document.getElementById('sidebarToggle');
-  if (sidebarToggle && leftSidebar) {
+  // Mobile sidebar toggle - clone to remove old event listeners
+  const oldSidebarToggle = document.getElementById('sidebarToggle');
+  if (oldSidebarToggle && leftSidebar) {
+    const sidebarToggle = oldSidebarToggle.cloneNode(true) as HTMLElement;
+    oldSidebarToggle.replaceWith(sidebarToggle);
     sidebarToggle.addEventListener('click', () => {
       leftSidebar.classList.toggle('open');
       sidebarToggle.textContent = leftSidebar.classList.contains('open') ? '✕' : '☰';
     });
 
     // Close sidebar when tapping outside on mobile
-    document.addEventListener('click', (e) => {
+    // Remove old listener if it exists
+    if ((window as any).__sidebarClickOutsideHandler) {
+      document.removeEventListener('click', (window as any).__sidebarClickOutsideHandler);
+    }
+    const clickOutsideHandler = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
+      const currentSidebar = document.getElementById('left-sidebar');
+      const currentToggle = document.getElementById('sidebarToggle');
       if (window.innerWidth <= 768 &&
-          leftSidebar.classList.contains('open') &&
-          !leftSidebar.contains(target) &&
-          target !== sidebarToggle) {
-        leftSidebar.classList.remove('open');
-        sidebarToggle.textContent = '☰';
+          currentSidebar?.classList.contains('open') &&
+          !currentSidebar.contains(target) &&
+          target !== currentToggle) {
+        currentSidebar.classList.remove('open');
+        if (currentToggle) currentToggle.textContent = '☰';
       }
-    });
+    };
+    (window as any).__sidebarClickOutsideHandler = clickOutsideHandler;
+    document.addEventListener('click', clickOutsideHandler);
   }
 
   // Return camera getter, update function, and touch handler for cleanup

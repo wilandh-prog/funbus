@@ -130,5 +130,8 @@ export function restoreGameState(gameEngine: GameEngine, savedState: Serializabl
   // For now, set to night density (will be updated on first frame)
   state.trafficDensity = 0.2;
 
+  // Rebuild spatial index with all restored stops (critical for NPC spawning)
+  gameEngine.updateSpatialIndex();
+
   console.log(`Restored game state: ${state.routes.length} routes, ${savedState.stats.tripsCompleted} trips completed`);
 }
