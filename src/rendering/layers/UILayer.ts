@@ -307,9 +307,36 @@ export class UILayer {
 
     if (routesAtStop.length === 0) return;
 
-    // Generate stop name based on first route's stop index
-    const firstRoute = routesAtStop[0];
-    const stopName = `Stop ${String.fromCharCode(65 + firstRoute.stopIndex)}`; // A, B, C, ...
+    // Find nearest zone name for the stop
+    let stopName = 'Bus Stop';
+    let minDistance = Infinity;
+
+    for (const zone of state.zones) {
+      if (!zone.name) continue;
+
+      // Calculate center of zone
+      const zoneCenterX = zone.x + zone.w / 2;
+      const zoneCenterY = zone.y + zone.h / 2;
+
+      // Check if stop is inside zone
+      const isInside = targetX >= zone.x && targetX < zone.x + zone.w &&
+                       targetY >= zone.y && targetY < zone.y + zone.h;
+
+      if (isInside) {
+        stopName = zone.name;
+        break;
+      }
+
+      // Calculate distance to zone center
+      const dx = targetX - zoneCenterX;
+      const dy = targetY - zoneCenterY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance < minDistance) {
+        minDistance = distance;
+        stopName = zone.name;
+      }
+    }
 
     // Find all waiting NPCs at this stop
     const npcsAtStop = state.npcs.filter(npc =>
@@ -446,14 +473,50 @@ export class UILayer {
           moodEmoji = '😟';
         }
 
+        // Determine which route this NPC is waiting for
+        let routeIndicator = '?';
+        let routeColor = '#888888';
+
+        if (npc.plannedRoute && npc.plannedRoute.routes.length > 0) {
+          const currentRouteIndex = npc.plannedRoute.routes[npc.plannedRoute.currentStopIndex];
+          if (currentRouteIndex !== undefined && state.routes[currentRouteIndex]) {
+            routeIndicator = `${currentRouteIndex + 1}`;
+            routeColor = state.routes[currentRouteIndex].color;
+          }
+        }
+
+        // Draw route indicator badge
+        const npcBadgeX = tooltipX + padding + 8;
+        const npcBadgeY = currentY + 7;
+        const npcBadgeRadius = 8;
+
+        ctx.fillStyle = routeColor;
+        ctx.beginPath();
+        ctx.arc(npcBadgeX, npcBadgeY, npcBadgeRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(npcBadgeX, npcBadgeY, npcBadgeRadius, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(routeIndicator, npcBadgeX, npcBadgeY);
+
         // Draw NPC info
         ctx.font = '11px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
         ctx.fillStyle = '#ffffff';
-        ctx.fillText(`${npc.name}`, tooltipX + padding, currentY);
+        ctx.fillText(`${npc.name}`, tooltipX + padding + 22, currentY);
 
         ctx.fillStyle = '#aaaaaa';
         const nameWidth = ctx.measureText(npc.name).width;
-        ctx.fillText(` → ${destName}`, tooltipX + padding + nameWidth, currentY);
+        ctx.fillText(` → ${destName}`, tooltipX + padding + 22 + nameWidth, currentY);
 
         // Draw mood emoji
         ctx.font = '14px sans-serif';

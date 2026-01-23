@@ -2329,13 +2329,13 @@ function setupUIHandlers(
       lastCursorX = clientX;
       lastCursorY = clientY;
 
-      // In pan mode, tap on stop to show info
+      // In pan mode, tap on stop to show info (search ALL routes)
       if (!buildModeActive) {
-        // Snap to nearest stop if within touch radius
-        const nearestStop = findNearestStopInRadius(canvasX, canvasY, MOBILE_STOP_TOUCH_RADIUS);
-        if (nearestStop) {
+        // Snap to nearest stop across all routes if within touch radius
+        const nearestStops = findNearestStopsAcrossRoutes(canvasX, canvasY, MOBILE_STOP_TOUCH_RADIUS);
+        if (nearestStops.length > 0) {
           // Set this stop as selected to show tooltip
-          renderer.getUILayer().setSelectedStop(nearestStop.gridX, nearestStop.gridY);
+          renderer.getUILayer().setSelectedStop(nearestStops[0].gridX, nearestStops[0].gridY);
         } else {
           // Tapped elsewhere, clear selection
           renderer.getUILayer().clearSelectedStop();
