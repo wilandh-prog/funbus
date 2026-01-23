@@ -575,6 +575,13 @@ function setupUIHandlers(
   // Build mode state - when false, clicking on empty road won't create stops
   let buildModeActive = true;
 
+  // Touch pan state - for one-finger panning on mobile when in pan mode
+  let touchPanState = {
+    active: false,
+    lastX: 0,
+    lastY: 0,
+  };
+
   // Camera state for panning and zooming
   let camera = {
     x: 0,
@@ -2382,6 +2389,15 @@ function setupUIHandlers(
     // Drag start
     onDragStart: (canvasX, canvasY) => {
       const state = gameEngine.getState();
+
+      // If in pan mode (buildModeActive = false), start panning
+      if (!buildModeActive) {
+        touchPanState.active = true;
+        touchPanState.lastX = canvasX;
+        touchPanState.lastY = canvasY;
+        return;
+      }
+
       if (state.routes.length === 0) return;
       if (state.interactionMode !== 'direct') return;
 
@@ -2426,6 +2442,17 @@ function setupUIHandlers(
 
     // Drag move
     onDragMove: (canvasX, canvasY) => {
+      // Handle touch panning in pan mode
+      if (touchPanState.active) {
+        const deltaX = canvasX - touchPanState.lastX;
+        const deltaY = canvasY - touchPanState.lastY;
+        camera.x += deltaX;
+        camera.y += deltaY;
+        touchPanState.lastX = canvasX;
+        touchPanState.lastY = canvasY;
+        return;
+      }
+
       if (!dragState.active) return;
 
       const state = gameEngine.getState();
@@ -2460,6 +2487,12 @@ function setupUIHandlers(
 
     // Drag end
     onDragEnd: (canvasX, canvasY) => {
+      // End touch panning if active
+      if (touchPanState.active) {
+        touchPanState.active = false;
+        return;
+      }
+
       if (!dragState.active) return;
 
       if (dragState.hasMoved) {
