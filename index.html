@@ -9,8 +9,8 @@
     <!-- Top Bar -->
     <div id="top-bar">
         <div class="top-bar-left">
-            <button id="return-to-menu-btn" class="return-to-menu-btn" style="margin-right: 15px;">← Cities</button>
-            <button id="pause-btn" class="pause-btn" title="Pause (Space)">⏸ Pause</button>
+            <button id="pause-btn" class="pause-btn compact" title="Pause (Space)">⏸</button>
+            <button id="mode-toggle-btn" class="mode-toggle-btn build-mode compact" title="Toggle Build/Pan Mode (B)">🛠</button>
             <div class="top-bar-money">
                 <span class="money-label">Money:</span>
                 <span class="money-value" id="topBarMoney">$5000</span>
@@ -37,6 +37,9 @@
     <div id="app-container">
         <!-- Left Sidebar -->
         <div id="left-sidebar">
+            <div class="sidebar-section sidebar-cities-btn">
+                <button id="return-to-menu-btn" class="return-to-menu-btn">← Cities</button>
+            </div>
             <div class="sidebar-section" data-section="statistics">
                 <div class="sidebar-section-header">
                     <h3>Statistics</h3>
@@ -250,9 +253,6 @@
                 <button id="show-tutorial-btn" class="tutorial-btn">Show Tutorial</button>
             </div>
 
-            <div class="sidebar-section mobile-only">
-                <button id="mobile-return-to-menu-btn" class="return-to-menu-btn mobile-menu-btn">← Cities</button>
-            </div>
         </div>
 
         <!-- Game Area -->

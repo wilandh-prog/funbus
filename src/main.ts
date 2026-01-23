@@ -127,7 +127,7 @@ function syncUIWithGameState(gameEngine: GameEngine) {
   const pauseBtn = document.getElementById('pause-btn');
   if (pauseBtn) {
     const isPaused = gameEngine.isPaused();
-    pauseBtn.textContent = isPaused ? '▶ Play' : '⏸ Pause';
+    pauseBtn.textContent = isPaused ? '▶' : '⏸';
     pauseBtn.classList.toggle('paused', isPaused);
   }
 
@@ -300,7 +300,7 @@ async function startGame(cityId: string, progression: ProgressionData, startFres
         gameEngine.togglePause();
         const pauseBtn = document.getElementById('pause-btn');
         if (pauseBtn) {
-          pauseBtn.textContent = '▶ Play';
+          pauseBtn.textContent = '▶';
           pauseBtn.classList.add('paused');
         }
       }
@@ -310,7 +310,7 @@ async function startGame(cityId: string, progression: ProgressionData, startFres
           gameEngine.togglePause();
           const pauseBtn = document.getElementById('pause-btn');
           if (pauseBtn) {
-            pauseBtn.textContent = '⏸ Pause';
+            pauseBtn.textContent = '⏸';
             pauseBtn.classList.remove('paused');
           }
         }
@@ -571,6 +571,9 @@ function setupUIHandlers(
     justFinishedDrag: false,
     hasMoved: false,
   };
+
+  // Build mode state - when false, clicking on empty road won't create stops
+  let buildModeActive = true;
 
   // Camera state for panning and zooming
   let camera = {
@@ -973,6 +976,11 @@ function setupUIHandlers(
     // Clicking on location - clear the drag flag
     dragState.justFinishedDrag = false;
 
+    // If build mode is not active, don't add new stops
+    if (!buildModeActive) {
+      return;
+    }
+
     // Add new stop
     if (activeRoute.stops.length < MAX_STOPS) {
       const success = gameEngine.addStopToRoute(state.activeRouteIndex, gridX, gridY);
@@ -1163,19 +1171,11 @@ function setupUIHandlers(
     });
   }
 
-  // Mobile return to menu button (in sidebar)
-  const mobileReturnBtn = document.getElementById('mobile-return-to-menu-btn');
-  if (mobileReturnBtn && callbacks?.onReturnToMenu) {
-    const newMobileReturnBtn = mobileReturnBtn.cloneNode(true) as HTMLElement;
-    mobileReturnBtn.parentNode?.replaceChild(newMobileReturnBtn, mobileReturnBtn);
-
-    newMobileReturnBtn.addEventListener('click', () => {
-      callbacks.onReturnToMenu!();
-    });
-  }
-
   // Add Route button
-  const addRouteBtn = document.getElementById('addRouteBtn')!;
+  // Add Route button - clone to remove old event listeners
+  const oldAddRouteBtn = document.getElementById('addRouteBtn')!;
+  const addRouteBtn = oldAddRouteBtn.cloneNode(true) as HTMLButtonElement;
+  oldAddRouteBtn.replaceWith(addRouteBtn);
   addRouteBtn.addEventListener('click', () => {
     const state = gameEngine.getState();
     if (state.routes.length >= 8) {
@@ -1195,8 +1195,10 @@ function setupUIHandlers(
     updateBusCount();
   });
 
-  // Delete Route button
-  const deleteRouteBtn = document.getElementById('deleteRouteBtn')!;
+  // Delete Route button - clone to remove old event listeners
+  const oldDeleteRouteBtn = document.getElementById('deleteRouteBtn')!;
+  const deleteRouteBtn = oldDeleteRouteBtn.cloneNode(true) as HTMLButtonElement;
+  oldDeleteRouteBtn.replaceWith(deleteRouteBtn);
   deleteRouteBtn.addEventListener('click', () => {
     const state = gameEngine.getState();
     if (state.routes.length === 0) return;
@@ -1220,10 +1222,12 @@ function setupUIHandlers(
     );
   });
 
-  // Delete Stop button (top bar)
-  const deleteStopTopBtn = document.getElementById('deleteStopTopBtn') as HTMLButtonElement;
+  // Delete Stop button (top bar) - clone to remove old event listeners
+  const oldDeleteStopTopBtn = document.getElementById('deleteStopTopBtn') as HTMLButtonElement;
 
-  if (deleteStopTopBtn) {
+  if (oldDeleteStopTopBtn) {
+    const deleteStopTopBtn = oldDeleteStopTopBtn.cloneNode(true) as HTMLButtonElement;
+    oldDeleteStopTopBtn.replaceWith(deleteStopTopBtn);
     deleteStopTopBtn.addEventListener('click', () => {
       const state = gameEngine.getState();
       if (state.selectedStopIndex === null || state.selectedStopIndex === -1) return;
@@ -1240,7 +1244,7 @@ function setupUIHandlers(
   const pauseBtn = document.getElementById('pause-btn')!;
   function updatePauseButton() {
     const isPaused = gameEngine.isPaused();
-    pauseBtn.textContent = isPaused ? '▶ Play' : '⏸ Pause';
+    pauseBtn.textContent = isPaused ? '▶' : '⏸';
     pauseBtn.classList.toggle('paused', isPaused);
   }
 
@@ -1267,7 +1271,37 @@ function setupUIHandlers(
         gameToasts.gameResumed();
       }
     }
+
+    // Keyboard shortcut for build mode toggle (B key)
+    if (e.code === 'KeyB' && !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+      toggleBuildMode();
+    }
   });
+
+  // Mode toggle button
+  const modeToggleBtn = document.getElementById('mode-toggle-btn');
+  function updateModeToggleButton() {
+    if (modeToggleBtn) {
+      modeToggleBtn.textContent = buildModeActive ? '🛠' : '👆';
+      modeToggleBtn.title = buildModeActive ? 'Build Mode (B) - Click to Pan' : 'Pan Mode (B) - Click to Build';
+      modeToggleBtn.classList.toggle('build-mode', buildModeActive);
+      modeToggleBtn.classList.toggle('pan-mode', !buildModeActive);
+      // Update canvas cursor class
+      canvas.classList.toggle('build-mode-active', buildModeActive);
+    }
+  }
+
+  function toggleBuildMode() {
+    buildModeActive = !buildModeActive;
+    updateModeToggleButton();
+  }
+
+  if (modeToggleBtn) {
+    modeToggleBtn.addEventListener('click', toggleBuildMode);
+  }
+
+  // Initialize button state
+  updateModeToggleButton();
 
   // Visual aids checkboxes
   const showCoverageRadiusCheckbox = document.getElementById('showCoverageRadius') as HTMLInputElement;
@@ -1352,8 +1386,10 @@ function setupUIHandlers(
     removeBusBtn.disabled = busCount <= 1;
   }
 
-  // Add Bus button
-  const addBusBtn = document.getElementById('addBusBtn')!;
+  // Add Bus button - clone to remove old event listeners
+  const oldAddBusBtn = document.getElementById('addBusBtn')!;
+  const addBusBtn = oldAddBusBtn.cloneNode(true) as HTMLButtonElement;
+  oldAddBusBtn.replaceWith(addBusBtn);
   addBusBtn.addEventListener('click', () => {
     const state = gameEngine.getState();
     if (state.routes.length > 0) {
@@ -1373,8 +1409,10 @@ function setupUIHandlers(
     }
   });
 
-  // Remove Bus button
-  const removeBusBtn = document.getElementById('removeBusBtn')!;
+  // Remove Bus button - clone to remove old event listeners
+  const oldRemoveBusBtn = document.getElementById('removeBusBtn')!;
+  const removeBusBtn = oldRemoveBusBtn.cloneNode(true) as HTMLButtonElement;
+  oldRemoveBusBtn.replaceWith(removeBusBtn);
   removeBusBtn.addEventListener('click', () => {
     const state = gameEngine.getState();
     if (state.routes.length > 0) {
@@ -1792,14 +1830,14 @@ function setupUIHandlers(
       // Pause the game during tutorial
       if (!gameEngine.isPaused()) {
         gameEngine.togglePause();
-        pauseBtn.textContent = '▶ Play';
+        pauseBtn.textContent = '▶';
         pauseBtn.classList.add('paused');
       }
       startTutorial(() => {
         // Resume game after tutorial
         if (gameEngine.isPaused()) {
           gameEngine.togglePause();
-          pauseBtn.textContent = '⏸ Pause';
+          pauseBtn.textContent = '⏸';
           pauseBtn.classList.remove('paused');
         }
       });
@@ -1877,10 +1915,12 @@ function setupUIHandlers(
               canvas.classList.add('can-drag');
             }
           } else {
-            // Can add a stop here
+            // Can add a stop here (only if build mode is active)
             canvas.classList.remove('can-drag');
-            if (!dragState.active) {
+            if (!dragState.active && buildModeActive) {
               canvas.classList.add('can-add-stop');
+            } else {
+              canvas.classList.remove('can-add-stop');
             }
           }
         } else {

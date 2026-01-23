@@ -116,10 +116,11 @@ export function showConfirmDialog(options: ConfirmDialogOptions): void {
  */
 export function hideConfirmDialog(): void {
   if (activeDialog) {
-    activeDialog.classList.add('hiding');
+    const dialogToRemove = activeDialog;
+    activeDialog = null; // Clear reference immediately
+    dialogToRemove.classList.add('hiding');
     setTimeout(() => {
-      activeDialog?.remove();
-      activeDialog = null;
+      dialogToRemove.remove();
     }, 200);
   }
 }

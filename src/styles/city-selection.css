@@ -52,6 +52,62 @@
   background: #f66;
 }
 
+/* Mode Toggle Button */
+.mode-toggle-btn {
+  background: #e67e22;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  min-width: 80px;
+  margin-left: 10px;
+}
+
+.mode-toggle-btn:hover {
+  background: #f39c12;
+}
+
+.mode-toggle-btn:active {
+  transform: scale(0.98);
+}
+
+.mode-toggle-btn.build-mode {
+  background: #e67e22;
+}
+
+.mode-toggle-btn.pan-mode {
+  background: #3498db;
+}
+
+.mode-toggle-btn.pan-mode:hover {
+  background: #5dade2;
+}
+
+/* Compact button styles (icon-only) */
+.pause-btn.compact,
+.mode-toggle-btn.compact {
+  min-width: auto;
+  padding: 6px 10px;
+  font-size: 16px;
+}
+
+.mode-toggle-btn.compact {
+  margin-left: 6px;
+}
+
+/* Sidebar Cities button */
+.sidebar-cities-btn {
+  padding: 8px 12px;
+}
+
+.sidebar-cities-btn .return-to-menu-btn {
+  width: 100%;
+}
+
 /* City Selection Overlay */
 
 .city-selection-overlay {
