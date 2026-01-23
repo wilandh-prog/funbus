@@ -8,9 +8,9 @@ export interface TouchHandlerConfig {
   canvas: HTMLCanvasElement;
   onTap: (x: number, y: number, clientX: number, clientY: number) => void;
   onLongPress: (x: number, y: number, clientX: number, clientY: number) => void;
-  onDragStart: (x: number, y: number) => void;
-  onDragMove: (x: number, y: number) => void;
-  onDragEnd: (x: number, y: number) => void;
+  onDragStart: (x: number, y: number, clientX: number, clientY: number) => void;
+  onDragMove: (x: number, y: number, clientX: number, clientY: number) => void;
+  onDragEnd: (x: number, y: number, clientX: number, clientY: number) => void;
   onPinchZoom: (scale: number, centerX: number, centerY: number) => void;
   onPan: (deltaX: number, deltaY: number) => void;
   getCamera: () => { x: number; y: number; zoom: number };
@@ -223,12 +223,12 @@ export class TouchHandler {
       // Check if should start dragging
       if (distance > DRAG_THRESHOLD && !this.state.isDragging) {
         this.state.isDragging = true;
-        this.config.onDragStart(this.state.startX, this.state.startY);
+        this.config.onDragStart(this.state.startX, this.state.startY, coords.clientX, coords.clientY);
       }
 
       // Continue drag
       if (this.state.isDragging) {
-        this.config.onDragMove(coords.canvasX, coords.canvasY);
+        this.config.onDragMove(coords.canvasX, coords.canvasY, coords.clientX, coords.clientY);
       }
 
     } else if (touches.length === 2) {
@@ -281,7 +281,7 @@ export class TouchHandler {
 
     if (this.state.isDragging) {
       // End drag
-      this.config.onDragEnd(this.state.currentX, this.state.currentY);
+      this.config.onDragEnd(this.state.currentX, this.state.currentY, this.lastTouchX, this.lastTouchY);
     } else if (!this.state.hasMoved && !this.state.isMultiTouch && duration < LONG_PRESS_DURATION) {
       // Quick tap (not a long press, not moved)
       this.config.onTap(this.state.startX, this.state.startY, this.lastTouchX, this.lastTouchY);
@@ -300,7 +300,7 @@ export class TouchHandler {
 
     // Cancel any ongoing drag
     if (this.state.isDragging) {
-      this.config.onDragEnd(this.state.currentX, this.state.currentY);
+      this.config.onDragEnd(this.state.currentX, this.state.currentY, this.lastTouchX, this.lastTouchY);
     }
 
     // Reset state

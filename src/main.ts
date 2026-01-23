@@ -2387,14 +2387,14 @@ function setupUIHandlers(
     },
 
     // Drag start
-    onDragStart: (canvasX, canvasY) => {
+    onDragStart: (canvasX, canvasY, clientX, clientY) => {
       const state = gameEngine.getState();
 
       // If in pan mode (buildModeActive = false), start panning
       if (!buildModeActive) {
         touchPanState.active = true;
-        touchPanState.lastX = canvasX;
-        touchPanState.lastY = canvasY;
+        touchPanState.lastX = clientX;
+        touchPanState.lastY = clientY;
         return;
       }
 
@@ -2441,15 +2441,15 @@ function setupUIHandlers(
     },
 
     // Drag move
-    onDragMove: (canvasX, canvasY) => {
+    onDragMove: (canvasX, canvasY, clientX, clientY) => {
       // Handle touch panning in pan mode
       if (touchPanState.active) {
-        const deltaX = canvasX - touchPanState.lastX;
-        const deltaY = canvasY - touchPanState.lastY;
+        const deltaX = clientX - touchPanState.lastX;
+        const deltaY = clientY - touchPanState.lastY;
         camera.x += deltaX;
         camera.y += deltaY;
-        touchPanState.lastX = canvasX;
-        touchPanState.lastY = canvasY;
+        touchPanState.lastX = clientX;
+        touchPanState.lastY = clientY;
         return;
       }
 
@@ -2486,7 +2486,7 @@ function setupUIHandlers(
     },
 
     // Drag end
-    onDragEnd: (canvasX, canvasY) => {
+    onDragEnd: (canvasX, canvasY, _clientX, _clientY) => {
       // End touch panning if active
       if (touchPanState.active) {
         touchPanState.active = false;
