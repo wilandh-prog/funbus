@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
 export default defineConfig({
-  base: '/funbus/',
+  base: './',
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
@@ -21,8 +21,7 @@ export default defineConfig({
       },
     },
 
-    // Minification can be re-enabled after installing terser
-    minify: false,
+    minify: true,
   },
 
   server: {

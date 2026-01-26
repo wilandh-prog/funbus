@@ -573,7 +573,7 @@ function setupUIHandlers(
   };
 
   // Build mode state - when false, clicking on empty road won't create stops
-  let buildModeActive = true;
+  let buildModeActive = false;
 
   // Touch pan state - for one-finger panning on mobile when in pan mode
   let touchPanState = {
@@ -1289,10 +1289,10 @@ function setupUIHandlers(
   const modeToggleBtn = document.getElementById('mode-toggle-btn');
   function updateModeToggleButton() {
     if (modeToggleBtn) {
-      modeToggleBtn.textContent = buildModeActive ? '🛠' : '👆';
+      modeToggleBtn.textContent = buildModeActive ? '👆' : '🛠';
       modeToggleBtn.title = buildModeActive ? 'Build Mode (B) - Click to Pan' : 'Pan Mode (B) - Click to Build';
-      modeToggleBtn.classList.toggle('build-mode', buildModeActive);
-      modeToggleBtn.classList.toggle('pan-mode', !buildModeActive);
+      modeToggleBtn.classList.toggle('build-mode', !buildModeActive);
+      modeToggleBtn.classList.toggle('pan-mode', buildModeActive);
       // Update canvas cursor class
       canvas.classList.toggle('build-mode-active', buildModeActive);
     }

@@ -100,9 +100,18 @@
     white-space: nowrap;
 }
 
+#addRouteBtn {
+    color: #4ade80;
+    font-size: 15px;
+    font-weight: bold;
+    border-color: #4ade80;
+    background: #1a3a1a;
+}
+
 #addRouteBtn:hover {
-    background: #3a3a3a;
-    border-color: #666;
+    background: #245a24;
+    border-color: #5ef48f;
+    color: #5ef48f;
 }
 
 #deleteRouteBtn, #deleteStopTopBtn {
@@ -144,9 +153,18 @@
     transition: all 0.2s;
 }
 
-#addBusBtn:hover {
-    background: #4a4a4a;
+#addBusBtn {
+    color: #4ade80;
+    font-size: 14px;
+    font-weight: bold;
     border-color: #4ade80;
+    background: #1a3a1a;
+}
+
+#addBusBtn:hover {
+    background: #245a24;
+    border-color: #5ef48f;
+    color: #5ef48f;
 }
 
 #removeBusBtn:hover {

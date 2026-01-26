@@ -13,7 +13,7 @@ interface TutorialStep {
 
 const TUTORIAL_STEPS: TutorialStep[] = [
   {
-    title: 'Welcome to Bus Line Simulator!',
+    title: 'Welcome to Bus Route Tycoon!',
     content: 'Build efficient bus routes to transport NPCs around the city. This tutorial will show you the basics.',
     position: 'center',
   },
@@ -24,8 +24,14 @@ const TUTORIAL_STEPS: TutorialStep[] = [
     position: 'left',
   },
   {
+    title: 'Build Mode vs Pan Mode',
+    content: 'Press B or click this button to toggle between modes. Build Mode (🛠 icon) lets you add/edit stops. Pan Mode (👆 icon) lets you explore the map without accidentally adding stops.',
+    targetSelector: '#mode-toggle-btn',
+    position: 'bottom',
+  },
+  {
     title: 'Adding Bus Stops',
-    content: 'Click on any road (gray lines) to add a bus stop. Stops are shown as colored circles. Your bus will travel between stops in order.',
+    content: 'In Build Mode, click on any road (gray lines) to add a bus stop. Stops are shown as colored circles. Your bus will travel between stops in order.',
     targetSelector: '#gameCanvas',
     position: 'left',
   },
@@ -43,7 +49,7 @@ const TUTORIAL_STEPS: TutorialStep[] = [
   },
   {
     title: 'Statistics Panel',
-    content: 'Track your performance here. The Score (0-100) measures how well you\'re serving NPCs. Higher is better!',
+    content: 'Track your performance here. Happiness (0-100) measures how well you\'re serving NPCs. Higher is better!',
     targetSelector: '[data-section="statistics"]',
     position: 'right',
   },
@@ -61,19 +67,25 @@ const TUTORIAL_STEPS: TutorialStep[] = [
   },
   {
     title: 'Managing Stops',
-    content: 'Right-click (or long-press on mobile) to delete a stop. Drag stops to move them to a better location.',
+    content: 'In Build Mode: Right-click (or long-press on mobile) to delete a stop. Drag stops to move them to a new location on the road.',
     targetSelector: '#gameCanvas',
     position: 'left',
   },
   {
+    title: 'Ticket Pricing',
+    content: 'Set your ticket price here. Higher prices = more income but fewer riders. Lower prices = more riders but less profit. Find the sweet spot!',
+    targetSelector: '#ticketPriceSlider',
+    position: 'right',
+  },
+  {
     title: 'Profit & Loss',
-    content: 'Keep an eye on your finances! Earn money from ticket sales, but watch out for bus operating costs.',
+    content: 'Keep an eye on your finances! Earn money from ticket sales, but watch out for bus operating costs and loan interest.',
     targetSelector: '[data-section="statistics"]',
     position: 'right',
   },
   {
     title: 'You\'re Ready!',
-    content: 'Start by adding 3-4 stops on roads near residential and commercial zones. Good luck building your bus empire!',
+    content: 'Start by switching to Build Mode (press B), then add 3-4 stops on roads near residential and commercial zones. Good luck building your bus empire!',
     position: 'center',
   },
 ];
