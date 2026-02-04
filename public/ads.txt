@@ -863,3 +863,17 @@ media.net, 8CUN4Y5Y3, RESELLER
 openx.com, 541017750, RESELLER, 6a698e2ec38604c6
 themediagrid.com, 3AW9JB, RESELLER, 35d5010d7789b49d
 lijit.com, 222372, RESELLER, fafdf38b16bf6b2b
+sharethrough.com, S2rESyUH, RESELLER, d53b998a7bd4ecd2
+supply.colossusssp.com, 181, RESELLER, 6c5b49d96ec1b458
+33across.com, 0014000001a0hIqAAI, RESELLER, bbea06d9c4d2853c
+aps.amazon.com, cfee765f-a9ba-4867-af16-2ff8d62ed9ba, RESELLER
+# Xapads
+Xapads.com, 211715, DIRECT
+33across.com, 001Pg00000HDbTOIA1, DIRECT, bbea06d9c4d2853c
+aps.amazon.com, 822c7bc2-d58f-4911-b8a2-95ee49e044c8, DIRECT
+# Zeta
+zetaglobal.net, 741, DIRECT
+sharethrough.com, UvcAx8IL, RESELLER, d53b998a7bd4ecd2
+sonobi.com, 296bf9795d, DIRECT, d1a215d9eb5aee9e
+video.unrulymedia.com, 919139201, RESELLER
+rubiconproject.com, 13380, RESELLER, 0bfd66d529a55807
