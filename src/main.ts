@@ -16,6 +16,7 @@ import { confirmDelete, confirmClear } from './ui/ConfirmDialog';
 import { initCollapsibleSections } from './ui/CollapsibleSections';
 import { gameToasts } from './ui/Toast';
 import { startTutorial, shouldShowTutorial, resetTutorial } from './ui/Tutorial';
+import { audioManager } from './audio/AudioManager';
 
 const MAX_STOPS = 40;
 
@@ -255,6 +256,9 @@ async function startGame(cityId: string, progression: ProgressionData, startFres
   });
 
   console.log('✓ Game started!');
+
+  // Start background music (will play after first user interaction)
+  audioManager.startMusic();
 
   // Auto-save functionality
   const saveCurrentGame = () => {
@@ -732,6 +736,7 @@ function setupUIHandlers(
       tab.style.zIndex = isActive ? '10' : '1';
 
       tab.addEventListener('click', () => {
+        audioManager.playClick();
         gameEngine.setActiveRoute(index);
         updateRouteTabs();
         updateStopList();
@@ -983,8 +988,9 @@ function setupUIHandlers(
     // Clicking on location - clear the drag flag
     dragState.justFinishedDrag = false;
 
-    // If build mode is not active, don't add new stops
+    // If build mode is not active, play error sound and don't add new stops
     if (!buildModeActive) {
+      audioManager.playError();
       return;
     }
 
@@ -992,9 +998,11 @@ function setupUIHandlers(
     if (activeRoute.stops.length < MAX_STOPS) {
       const success = gameEngine.addStopToRoute(state.activeRouteIndex, gridX, gridY);
       if (!success) {
+        audioManager.playError();
         gameToasts.notEnoughMoney(100);
         return;
       }
+      audioManager.playPurchase();
 
       // Initialize first bus position if first stop (centered on grid)
       if (activeRoute.stops.length === 1 && activeRoute.buses.length > 0) {
@@ -1174,6 +1182,8 @@ function setupUIHandlers(
 
     // Add fresh event listener
     newReturnBtn.addEventListener('click', () => {
+      audioManager.playClick();
+      audioManager.stopMusic();
       callbacks.onReturnToMenu!();
     });
   }
@@ -1184,6 +1194,7 @@ function setupUIHandlers(
   const addRouteBtn = oldAddRouteBtn.cloneNode(true) as HTMLButtonElement;
   oldAddRouteBtn.replaceWith(addRouteBtn);
   addRouteBtn.addEventListener('click', () => {
+    audioManager.playClick();
     const state = gameEngine.getState();
     if (state.routes.length >= 8) {
       gameToasts.maxRoutesReached();
@@ -1192,10 +1203,14 @@ function setupUIHandlers(
 
     const success = gameEngine.addRoute();
     if (success) {
+      audioManager.playPurchase();
       // Select the newly added route
       const newRouteIndex = gameEngine.getState().routes.length - 1;
       gameEngine.setActiveRoute(newRouteIndex);
       gameToasts.routeAdded(newRouteIndex + 1);
+    } else {
+      audioManager.playError();
+      gameToasts.notEnoughMoney(800); // Route cost + bus cost
     }
     updateRouteTabs();
     updateStopList();
@@ -1207,6 +1222,7 @@ function setupUIHandlers(
   const deleteRouteBtn = oldDeleteRouteBtn.cloneNode(true) as HTMLButtonElement;
   oldDeleteRouteBtn.replaceWith(deleteRouteBtn);
   deleteRouteBtn.addEventListener('click', () => {
+    audioManager.playClick();
     const state = gameEngine.getState();
     if (state.routes.length === 0) return;
 
@@ -1219,6 +1235,7 @@ function setupUIHandlers(
       `Route ${routeNumber}`,
       `This will permanently delete Route ${routeNumber} with ${stopCount} stop${stopCount !== 1 ? 's' : ''} and ${busCount} bus${busCount !== 1 ? 'es' : ''}.`,
       () => {
+        audioManager.playClick();
         gameEngine.deleteRoute();
         updateRouteTabs();
         updateStopList();
@@ -1236,6 +1253,7 @@ function setupUIHandlers(
     const deleteStopTopBtn = oldDeleteStopTopBtn.cloneNode(true) as HTMLButtonElement;
     oldDeleteStopTopBtn.replaceWith(deleteStopTopBtn);
     deleteStopTopBtn.addEventListener('click', () => {
+      audioManager.playClick();
       const state = gameEngine.getState();
       if (state.selectedStopIndex === null || state.selectedStopIndex === -1) return;
       if (state.routes.length === 0) return;
@@ -1256,6 +1274,7 @@ function setupUIHandlers(
   }
 
   pauseBtn.addEventListener('click', () => {
+    audioManager.playClick();
     gameEngine.togglePause();
     updatePauseButton();
     if (gameEngine.isPaused()) {
@@ -1270,6 +1289,7 @@ function setupUIHandlers(
     // Only toggle pause if not typing in an input field
     if (e.code === 'Space' && !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
       e.preventDefault(); // Prevent page scroll
+      audioManager.playClick();
       gameEngine.togglePause();
       updatePauseButton();
       if (gameEngine.isPaused()) {
@@ -1281,6 +1301,7 @@ function setupUIHandlers(
 
     // Keyboard shortcut for build mode toggle (B key)
     if (e.code === 'KeyB' && !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+      audioManager.playClick();
       toggleBuildMode();
     }
   });
@@ -1304,7 +1325,10 @@ function setupUIHandlers(
   }
 
   if (modeToggleBtn) {
-    modeToggleBtn.addEventListener('click', toggleBuildMode);
+    modeToggleBtn.addEventListener('click', () => {
+      audioManager.playClick();
+      toggleBuildMode();
+    });
   }
 
   // Initialize button state
@@ -1315,10 +1339,12 @@ function setupUIHandlers(
   const showBusSpeedCheckbox = document.getElementById('showBusSpeed') as HTMLInputElement;
 
   showCoverageRadiusCheckbox.addEventListener('change', () => {
+    audioManager.playClick();
     renderer.getRouteLayer().showCoverageRadius = showCoverageRadiusCheckbox.checked;
   });
 
   showBusSpeedCheckbox.addEventListener('change', () => {
+    audioManager.playClick();
     renderer.getEntityLayer().showBusSpeed = showBusSpeedCheckbox.checked;
   });
 
@@ -1327,28 +1353,34 @@ function setupUIHandlers(
   const repayBtn = document.getElementById('repayBtn') as HTMLButtonElement;
 
   borrowBtn.addEventListener('click', () => {
+    audioManager.playClick();
     const availableLoan = gameEngine.getAvailableLoan();
     if (availableLoan < 500) {
+      audioManager.playError();
       gameToasts.noLoanAvailable();
       return;
     }
 
     const success = gameEngine.takeLoan(500);
     if (success) {
+      audioManager.playPurchase();
       updateUI(gameEngine, statsCalculator);
       gameToasts.loanTaken(500);
     }
   });
 
   repayBtn.addEventListener('click', () => {
+    audioManager.playClick();
     const state = gameEngine.getState();
     if (state.economics.money < 500) {
+      audioManager.playError();
       gameToasts.notEnoughMoney(500);
       return;
     }
 
     const success = gameEngine.repayLoan(500);
     if (success) {
+      audioManager.playPurchase();
       updateUI(gameEngine, statsCalculator);
       gameToasts.loanRepaid(500);
     }
@@ -1367,6 +1399,10 @@ function setupUIHandlers(
     const price = parseFloat(ticketPriceSlider.value);
     gameEngine.setTicketPrice(price);
     ticketPriceValue.textContent = price === 0 ? 'Free' : `$${price.toFixed(2)}`;
+  });
+
+  ticketPriceSlider.addEventListener('change', () => {
+    audioManager.playClick();
   });
 
   /**
@@ -1398,6 +1434,7 @@ function setupUIHandlers(
   const addBusBtn = oldAddBusBtn.cloneNode(true) as HTMLButtonElement;
   oldAddBusBtn.replaceWith(addBusBtn);
   addBusBtn.addEventListener('click', () => {
+    audioManager.playClick();
     const state = gameEngine.getState();
     if (state.routes.length > 0) {
       const activeRoute = state.routes[state.activeRouteIndex];
@@ -1408,9 +1445,11 @@ function setupUIHandlers(
 
       const success = gameEngine.addBusToRoute(state.activeRouteIndex);
       if (!success) {
+        audioManager.playError();
         gameToasts.notEnoughMoney(300);
         return;
       }
+      audioManager.playPurchase();
       updateBusCount();
       gameToasts.busAdded(activeRoute.buses.length);
     }
@@ -1421,6 +1460,7 @@ function setupUIHandlers(
   const removeBusBtn = oldRemoveBusBtn.cloneNode(true) as HTMLButtonElement;
   oldRemoveBusBtn.replaceWith(removeBusBtn);
   removeBusBtn.addEventListener('click', () => {
+    audioManager.playClick();
     const state = gameEngine.getState();
     if (state.routes.length > 0) {
       const activeRoute = state.routes[state.activeRouteIndex];
@@ -1438,6 +1478,7 @@ function setupUIHandlers(
   // Clear All Stops button
   const clearAllBtn = document.getElementById('clearAllBtn')!;
   clearAllBtn.addEventListener('click', () => {
+    audioManager.playClick();
     const state = gameEngine.getState();
     if (state.routes.length === 0) return;
 
@@ -1451,6 +1492,7 @@ function setupUIHandlers(
       `All Stops`,
       `This will remove all ${stopCount} stop${stopCount !== 1 ? 's' : ''} from Route ${routeNumber}. Buses will stop operating until new stops are added.`,
       () => {
+        audioManager.playClick();
         clearAllStops();
         gameToasts.stopsCleared(stopCount);
       }
@@ -1531,6 +1573,7 @@ function setupUIHandlers(
 
   // Mini menu button handlers
   selectStopBtn.addEventListener('click', () => {
+    audioManager.playClick();
     const state = gameEngine.getState();
     if (currentMenuGridX >= 0 && currentMenuGridY >= 0 && state.routes.length > 0) {
       const activeRoute = state.routes[state.activeRouteIndex];
@@ -1555,6 +1598,7 @@ function setupUIHandlers(
   });
 
   addStopBtn.addEventListener('click', () => {
+    audioManager.playClick();
     const state = gameEngine.getState();
     if (currentMenuGridX >= 0 && currentMenuGridY >= 0 && state.routes.length > 0) {
       const activeRoute = state.routes[state.activeRouteIndex];
@@ -1563,10 +1607,12 @@ function setupUIHandlers(
         // Add new stop
         const success = gameEngine.addStopToRoute(state.activeRouteIndex, currentMenuGridX, currentMenuGridY);
         if (!success) {
+          audioManager.playError();
           gameToasts.notEnoughMoney(100);
           hideMiniMenu();
           return;
         }
+        audioManager.playPurchase();
 
         // Initialize first bus position if first stop (centered on grid)
         if (activeRoute.stops.length === 1 && activeRoute.buses.length > 0) {
@@ -1597,6 +1643,7 @@ function setupUIHandlers(
   });
 
   moveStopBtn.addEventListener('click', () => {
+    audioManager.playClick();
     const state = gameEngine.getState();
     if (
       currentMenuGridX >= 0 &&
@@ -1637,6 +1684,7 @@ function setupUIHandlers(
   });
 
   deleteStopBtn.addEventListener('click', () => {
+    audioManager.playClick();
     const state = gameEngine.getState();
     if (currentMenuGridX >= 0 && currentMenuGridY >= 0 && state.routes.length > 0) {
       const activeRoute = state.routes[state.activeRouteIndex];
@@ -1818,12 +1866,14 @@ function setupUIHandlers(
 
   if (helpBtn && helpPanel) {
     helpBtn.addEventListener('click', () => {
+      audioManager.playClick();
       helpPanel.style.display = 'block';
     });
   }
 
   if (closeHelpBtn && helpPanel) {
     closeHelpBtn.addEventListener('click', () => {
+      audioManager.playClick();
       helpPanel.style.display = 'none';
     });
   }
@@ -1832,6 +1882,7 @@ function setupUIHandlers(
   const showTutorialBtn = document.getElementById('show-tutorial-btn');
   if (showTutorialBtn) {
     showTutorialBtn.addEventListener('click', () => {
+      audioManager.playClick();
       // Reset tutorial so it can be shown again
       resetTutorial();
       // Pause the game during tutorial
@@ -2596,6 +2647,7 @@ function setupUIHandlers(
     const sidebarToggle = oldSidebarToggle.cloneNode(true) as HTMLElement;
     oldSidebarToggle.replaceWith(sidebarToggle);
     sidebarToggle.addEventListener('click', () => {
+      audioManager.playClick();
       leftSidebar.classList.toggle('open');
       sidebarToggle.textContent = leftSidebar.classList.contains('open') ? '✕' : '☰';
     });
